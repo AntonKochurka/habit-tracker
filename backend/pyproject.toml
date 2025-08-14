@@ -1,0 +1,31 @@
+[project]
+name = "backend"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "AntonKochurka",email = "antonkotchurka@gmail.com"}
+]
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "fastapi (>=0.116.1,<0.117.0)",
+    "uvicorn (>=0.35.0,<0.36.0)",
+    "pydantic (>=2.11.7,<3.0.0)",
+    "sqlalchemy (>=2.0.43,<3.0.0)",
+    "alembic (>=1.16.4,<2.0.0)",
+    "psycopg2-binary (>=2.9.10,<3.0.0)",
+    "passlib (>=1.7.4,<2.0.0)",
+    "python-dotenv (>=1.1.1,<2.0.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.group.dev.dependencies]
+black = "^25.1.0"
+flake8 = "^7.3.0"
+mypy = "^1.17.1"
+pytest = "^8.4.1"
+

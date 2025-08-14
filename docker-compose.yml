@@ -1,0 +1,22 @@
+version: '3.8'
+services:
+  db:
+    image: postgres:17.5
+    env_file: .env  
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-habitdb}  
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data 
+  backend:
+    build: ./backend
+    env_file: .env
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "4300:4300"
+
+volumes:
+  postgres_data:
