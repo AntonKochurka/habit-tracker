@@ -1,0 +1,9 @@
+from pydantic import BaseModel
+
+class ObtainPairRequest(BaseModel): ...
+class RefreshPairRequest(BaseModel): ...
+class BlacklistTokenRequest(BaseModel): ...
+
+class TokensPair(BaseModel): 
+    access: str
+    refresh: str
