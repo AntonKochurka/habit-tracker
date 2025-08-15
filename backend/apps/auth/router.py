@@ -5,8 +5,7 @@ router = APIRouter(prefix="/auth")
 
 
 @router.post("/obtain")
-async def obtain_pair(
-):
+async def obtain_pair():
     return TokensPair()
 
 @router.post("/refresh")
