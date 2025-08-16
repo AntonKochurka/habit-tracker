@@ -1,3 +1,4 @@
+from fastapi import Cookie
 from pydantic import BaseModel
 
 class ObtainPairRequest(BaseModel): 
@@ -5,15 +6,15 @@ class ObtainPairRequest(BaseModel):
     password: str
 
 class RefreshPairRequest(BaseModel): 
-    refresh: str
+    refresh: str | None = Cookie(None)
 
 class BlacklistTokenRequest(BaseModel): 
-    refresh: str
+    refresh: str | None = Cookie(None)
     access: str
 
 class TokensPair(BaseModel): 
-    access: str
     refresh: str
+    access: str
 
     class Config:
         from_attributes = True
