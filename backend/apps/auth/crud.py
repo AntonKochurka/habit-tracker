@@ -30,13 +30,6 @@ class AuthCrud:
             
             return existing
 
-    async def get_by_jti(self, jti: str) -> BlacklistedToken | None:
-        """Add token's jti to blacklisted token table,"""
-        q = select(BlacklistedToken).filter_by(jti=jti)        
-        result = await self.db.execute(q)
-
-        return result.scalars().first()
-
     async def is_jti_blacklisted(self, jti: str) -> bool:
         """Check if jti is blacklisted"""
         q = select(BlacklistedToken.jti).filter_by(jti=jti)

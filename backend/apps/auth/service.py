@@ -39,11 +39,11 @@ class AuthService:
         token = jwt.encode(payload, settings.SECRET_KEY, algorithm=settings.JWT_ALGORITHM)
         return exp_ts, token
 
-    async def decode_token(self, token: str) -> int:
+    async def decode_token(self, token: str) -> dict:
         """
         Decode token, verify signature/exp, check blacklist.
         Raises HTTPException(401) on invalid/expired/blacklisted.
-        Returns user_id (int).
+        Returns payload.
         """
         try:
             payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
@@ -59,7 +59,13 @@ class AuthService:
         blacklisted = await self.auth_crud.is_jti_blacklisted(jti)
         if blacklisted:
             raise HTTPException(status_code=401, detail="Token is blacklisted")
+        
+        return payload
 
+    async def decode_token_id(self, token) -> int:
+        """Return just id"""
+        
+        payload = await self.decode_token(token) 
         return int(payload["sub"])
 
     def set_refresh(self, response: Response, refresh: str, expires: int):

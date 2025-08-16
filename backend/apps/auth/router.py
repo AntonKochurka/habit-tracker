@@ -35,16 +35,16 @@ async def obtain_pair(
 
 @router.post("/refresh", response_model=TokensPair)
 async def refresh_pair(
-    token: str | None = Depends(refresh_token),
+    data: RefreshPairRequest = Depends(),
     service: AuthService = Depends(get_service),
 ):
-    if not token:
+    if not data.refresh:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, 
             detail="Refresh token was not provided"
         )
 
-    user_id = await service.decode_token(token)
+    user_id = await service.decode_token_id(data.refresh)
 
     _, access = service.encode_token(user_id, token_type="access")
     expires, refresh = service.encode_token(user_id, token_type="refresh")
@@ -56,14 +56,23 @@ async def refresh_pair(
     
     return response
 
+@router.delete("/blacklist")
+async def blacklist_pair(
+    body: BlacklistTokenRequest = Depends(),
+    service: AuthService = Depends(get_service)
+): 
+    for token, token_type in zip((body.access.credentials, body.refresh,), ('access', 'refresh')):
+        print(token, token_type)
+        if not token:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED, 
+                detail=f"{token_type.capitalize()} token was not provided"
+            )
+        
+        payload = await service.decode_token(token)
+        await service.auth_crud.blacklist_jti_token(jti=payload.get("jti"), token_type=token_type)
+    
+    response = JSONResponse(None, status_code=status.HTTP_204_NO_CONTENT)
+    response.delete_cookie("refresh")
 
-@router.delete("/blacklist", status_code=status.HTTP_204_NO_CONTENT)
-async def blacklist_pair(payload: BlacklistTokenRequest, service: AuthService = Depends(get_service)):
-    jti = getattr(payload, "jti", None)
-    token_type = getattr(payload, "token_type", None)
-
-    if not jti or token_type not in ("access", "refresh"):
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="jti and valid token_type required")
-
-    await service.crud.blacklist_jti_token(jti=jti, token_type=token_type)
-    return JSONResponse(content=None, status_code=status.HTTP_204_NO_CONTENT)
+    return response
