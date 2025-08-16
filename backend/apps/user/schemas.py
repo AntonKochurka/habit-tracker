@@ -9,6 +9,7 @@ class UserBase(BaseModel):
     is_superuser: bool = False
     is_deleted: bool = False
 
+
 class UserCreateRequest(UserBase):
     password: constr(min_length=6)
 

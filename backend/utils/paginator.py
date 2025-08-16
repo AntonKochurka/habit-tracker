@@ -1,6 +1,9 @@
 from typing import Any, Iterable, List, Optional, Tuple, Dict
 from math import ceil
 
+from fastapi import HTTPException, status
+from pydantic import BaseModel
+
 import re
 
 from sqlalchemy import select, desc, asc
@@ -21,16 +24,37 @@ _SUFFIXES = {
 }
 
 class Paginator:
-    def __init__(self, model, session: Optional[AsyncSession] = None):
+    def __init__(
+        self, 
+        model, 
+        *, 
+        forbiden_list: list = None, 
+        item_model: BaseModel = None,
+        session: Optional[AsyncSession] = None
+    ):
         """
         model: SQLAlchemy ORM mapped class (e.g., User)
+        forbiden_list: list of fields which cannot be filtrated (for preprevent filtrating by sensetive data)
+        item_model: Pydantic ORM Model which will wrap pagination items.
         session: AsyncSession instance (can be passed later to apply/paginate)
         """
         self.model = model
+        self.forbiden_list = getattr(model, "__forbidden_list__")
+
+        if self.forbiden_list is None:
+            self.forbiden_list = []
+
+        self.ItemModel = item_model
         self._session = session
         self._where = []
         self._order_by: List[Any] = []
         self._base_query: Optional[Select] = None
+
+    def filtrate_by_dict(self, filters: Dict):
+        """filtrating by {'field':'value'} dict"""
+
+        for field, value in filters.keys():
+            self.filtrate(field, value)
 
     def filtrate(self, field: str, value: Any):
         """
@@ -39,10 +63,13 @@ class Paginator:
         """
         field_name, op = self._parse_field(field)
 
+        if field_name in self.forbiden_list:
+            raise HTTPException(detail=f"Field '{field_name}' cannot be filtrated", status_code=status.HTTP_403_FORBIDDEN)
+
         col = getattr(self.model, field_name, None)
         if col is None or not isinstance(col, InstrumentedAttribute):
-            raise ValueError(f"Unknown field '{field_name}' for model {self.model.__name__}")
-
+            raise HTTPException(detail=f"Unknown field '{field_name}'", status_code=status.HTTP_400_BAD_REQUEST)
+        
         expr = self._build_expr(col, op, value)
         self._where.append(expr)
 
@@ -70,18 +97,6 @@ class Paginator:
             q = q.order_by(*self._order_by)
 
         return q
-
-    async def apply(self, session: Optional[AsyncSession] = None) -> List[Any]:
-        """Execute current query and return all rows (ORM objects). """
-        sess = session or self._session
-
-        if sess is None:
-            raise RuntimeError("No AsyncSession provided to Paginator (pass to constructor or to apply()).")
-        
-        q = self._make_query()
-        
-        result = await sess.execute(q)
-        return result.scalars().all()
 
     async def paginate(
         self,
@@ -119,6 +134,9 @@ class Paginator:
         q = base_q.limit(per_page).offset(offset)
         result = await sess.execute(q)
         items = result.scalars().all()
+
+        if self.ItemModel is not None:
+            items = [self.ItemModel(item) for item in items]
 
         return {
             "items": items,

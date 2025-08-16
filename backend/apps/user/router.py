@@ -1,5 +1,5 @@
 from typing import List
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from fastapi.responses import JSONResponse
 
 from db import AsyncSession, get_async_session
@@ -12,8 +12,12 @@ from .service import UserService
 async def get_service(db: AsyncSession = Depends(get_async_session)):
     return UserService(UserCrud(db))
 
-router = APIRouter(prefix="/user")
+router = APIRouter(prefix="/users")
 
-@router.get("/", response_model=List[UserRead])
-async def get_users_list():
+@router.get("", response_model=List[UserRead])
+async def get_users_list(
+    filters: Dict[str, Any] = Depends(create_filter_dependency(User)),
+    page: int = Query(1, ge=1),
+    service: UserService = Depends(get_service),
+):
     ...
