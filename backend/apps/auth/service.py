@@ -29,7 +29,7 @@ class AuthService:
         exp_ts = int(exp.timestamp())
 
         payload = {
-            "sub": user_id,
+            "sub": str(user_id),
             "type": token_type,
             "iat": iat_ts,
             "exp": exp_ts,

@@ -5,6 +5,7 @@ from db import AsyncSession, get_async_session
 from .schemas import TokensPair, BlacklistTokenRequest, ObtainPairRequest, RefreshPairRequest
 from .crud import AuthCrud
 from .service import AuthService
+from .dependencies import refresh_token
 
 async def get_service(db: AsyncSession = Depends(get_async_session)):
     return AuthService(AuthCrud(db))
@@ -34,13 +35,16 @@ async def obtain_pair(
 
 @router.post("/refresh", response_model=TokensPair)
 async def refresh_pair(
-    data: RefreshPairRequest,
+    token: str | None = Depends(refresh_token),
     service: AuthService = Depends(get_service),
 ):
-    if not getattr(data, "refresh", None):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Refresh token was not provided")
+    if not token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, 
+            detail="Refresh token was not provided"
+        )
 
-    user_id = await service.decode_token(data.refresh)
+    user_id = await service.decode_token(token)
 
     _, access = service.encode_token(user_id, token_type="access")
     expires, refresh = service.encode_token(user_id, token_type="refresh")

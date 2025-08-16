@@ -1,4 +1,4 @@
-from fastapi import Cookie
+from fastapi import Depends, Cookie
 from pydantic import BaseModel
 
 class ObtainPairRequest(BaseModel): 
