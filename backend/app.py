@@ -11,6 +11,7 @@ def create_app() -> FastAPI:
     app = FastAPI(lifespan=lifespan)
 
     app.include_router(auth.router.router)
+    app.include_router(user.router.router)
 
     return app
 

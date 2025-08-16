@@ -8,8 +8,8 @@ from config import settings
 from .crud import AuthCrud
 
 class AuthService:
-    def __init__(self, crud: AuthCrud):
-        self.crud = crud
+    def __init__(self, auth_crud: AuthCrud):
+        self.auth_crud = auth_crud
 
     def _now_ts(self) -> int:
         return int(datetime.now(tz=timezone.utc).timestamp())
@@ -56,7 +56,7 @@ class AuthService:
         if not jti:
             raise HTTPException(status_code=401, detail="Missing jti in token")
 
-        blacklisted = await self.crud.is_jti_blacklisted(jti)
+        blacklisted = await self.auth_crud.is_jti_blacklisted(jti)
         if blacklisted:
             raise HTTPException(status_code=401, detail="Token is blacklisted")
 
