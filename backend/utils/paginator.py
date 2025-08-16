@@ -86,13 +86,16 @@ class Paginator:
     async def paginate(
         self,
         page: int = 1,
+        per_page: None | int = None,
         session: Optional[AsyncSession] = None
     ) -> Dict[str, Any]:
         """
         Executes query with LIMIT/OFFSET and returns:
         { items: [...], total: int, page: int, per_page: int, pages: int }
         """
-        per_page = settings.PER_PAGE
+        if per_page is None:
+            per_page = settings.PER_PAGE
+         
         sess = session or self._session
         if sess is None:
             raise RuntimeError("No AsyncSession provided to Paginator (pass to constructor or to paginate()).")

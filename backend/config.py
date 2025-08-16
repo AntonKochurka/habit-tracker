@@ -18,8 +18,9 @@ class Settings(BaseSettings):
     def DB_URL(self):
         return f"postgresql+asyncpg://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_HOST}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
 
-    class Config:
-        extra = "ignore"
-        env_file = "../.env" 
+    model_config = {
+        "extra" : "ignore",
+        "env_file" : "../.env" 
+    }
 
 settings = Settings()
