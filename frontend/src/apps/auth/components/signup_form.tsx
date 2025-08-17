@@ -3,6 +3,9 @@ import { signUpSchema, type SignUpValues } from "../service/validation";
 import { FormInput } from "@shared/components/form_input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Link } from "react-router-dom";
+import api from "@shared/api";
+import { useAppDispatch } from "@shared/store";
+import { loginThunk } from "../redux/thunks";
 
 export default function SignUpForm() {
     const { 
@@ -10,10 +13,19 @@ export default function SignUpForm() {
         handleSubmit, 
         formState: { errors, isSubmitting } 
     } = useForm<SignUpValues>({ resolver: zodResolver(signUpSchema) });
+    const dispatch = useAppDispatch()
 
     const onSubmit = async (values: SignUpValues) => {
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        console.log(values)
+        try {
+            const { confirmPassword, ...data} = values
+            const response = await api.post("/user/create", data)
+
+            if (response.status === 201) {
+                await dispatch(loginThunk({identefier: data.username, password: data.password}))
+            }
+        } catch (error) {
+            
+        }
     }
 
     return (

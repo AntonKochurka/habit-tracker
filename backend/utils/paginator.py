@@ -146,6 +146,22 @@ class Paginator:
             "pages": pages,
         }
 
+    async def first(self, session: Optional[AsyncSession] = None):
+        """Returns just one single record with filters"""
+        sess = session or self._session
+        if sess is None:
+            raise RuntimeError(...)
+        
+        q = self._make_query().limit(1)
+        
+        result = await sess.execute(q)
+        
+        item = result.scalars().first()
+        if self.ItemModel is not None and item is not None:
+            item = self.ItemModel(item)
+        
+        return item
+
     def _parse_field(self, field: str) -> Tuple[str, str]:
         """
         Return (field_name, op). op is one of keys in _SUFFIXES or 'exact'.
