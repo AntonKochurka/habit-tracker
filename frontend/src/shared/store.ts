@@ -1,9 +1,10 @@
+import { AUTH_REDUX_KEY, authReducer } from "@app/auth/redux";
 import { configureStore } from "@reduxjs/toolkit";
 import { useDispatch, useSelector } from "react-redux";
 
 export const store = configureStore({
   reducer: {
-    // TODO: auth reducer
+    [AUTH_REDUX_KEY]: authReducer
   },
 });
 
