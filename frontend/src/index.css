@@ -1,0 +1,30 @@
+@import url('https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&display=swap');
+
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@layer components {
+  .text-gradient {
+    @apply bg-gradient-to-r from-sky-500 to-blue-600 bg-clip-text text-transparent;
+    @apply dark:from-sky-400 dark:to-blue-500; 
+  }
+  
+  .btn-primary {
+    @apply rounded-lg bg-gradient-to-r from-sky-500 to-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm;
+    @apply hover:from-sky-600 hover:to-blue-700 transition-all duration-200;
+    @apply dark:from-sky-600 dark:to-blue-700 dark:hover:from-sky-700 dark:hover:to-blue-800;
+  }
+}
+
+* {
+  font-family: "Figtree", sans-serif;
+}
+
+html {
+  @apply transition-colors duration-800;
+}
+
+body {
+  @apply bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100;
+}
