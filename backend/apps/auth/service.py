@@ -98,3 +98,9 @@ class AuthService:
             raise HTTPException(detail="User with this username does'nt exist", status_code=status.HTTP_404_NOT_FOUND)
         
         return user.id if verify_password(password, user.password) else None
+
+    async def get_current_user(self, token) -> User | None:
+        """Returns user by token"""
+        user_id = self.decode_token_id(token)
+        
+        return (await self.user_crud.get_user_by("id", user_id))

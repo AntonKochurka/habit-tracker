@@ -5,15 +5,9 @@ from db import AsyncSession, get_async_session
 from .schemas import TokensPair, BlacklistTokenRequest, ObtainPairRequest, RefreshPairRequest
 from .crud import AuthCrud
 from .service import AuthService
-from .dependencies import refresh_token
-
-from apps.user.crud import UserCrud
-
-async def get_service(db: AsyncSession = Depends(get_async_session)):
-    return AuthService(AuthCrud(db), UserCrud(db))
+from .dependencies import refresh_token, get_service
 
 router = APIRouter(prefix="/auth")
-
 
 @router.post("/obtain", response_model=TokensPair)
 async def obtain_pair(
