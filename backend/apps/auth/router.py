@@ -1,11 +1,14 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import JSONResponse
-from db import AsyncSession, get_async_session
 
-from .schemas import TokensPair, BlacklistTokenRequest, ObtainPairRequest, RefreshPairRequest
-from .crud import AuthCrud
-from .service import AuthService
-from .dependencies import refresh_token, get_service
+from .schemas import (
+    TokensPair, 
+    BlacklistTokenRequest, 
+    ObtainPairRequest, 
+    RefreshPairRequest
+)
+
+from .dependencies import get_service, AuthService
 
 router = APIRouter(prefix="/auth")
 

@@ -1,5 +1,9 @@
-from fastapi import HTTPException
-from fastapi.security import HTTPBearer, APIKeyCookie, HTTPAuthorizationCredentials
+from fastapi import HTTPException, Depends
+from fastapi.security import (
+    HTTPBearer, 
+    APIKeyCookie, 
+    HTTPAuthorizationCredentials
+)
 
 from db import AsyncSession, get_async_session
 

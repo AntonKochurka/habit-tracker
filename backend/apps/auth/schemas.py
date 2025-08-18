@@ -1,4 +1,4 @@
-from fastapi import Depends, Cookie
+from fastapi import Depends
 from pydantic import BaseModel
 
 from .dependencies import access_token, refresh_token, HTTPAuthorizationCredentials

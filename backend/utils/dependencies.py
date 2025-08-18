@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional, Set, Callable
+from typing import Any, Dict, Set, Callable
 from fastapi import Request, Query
 from sqlalchemy.orm import DeclarativeMeta
 

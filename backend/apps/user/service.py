@@ -1,7 +1,7 @@
 from .crud import UserCrud
 from .schemas import UserCreateRequest
 
-from fastapi import status, HTTPException
+from utils.security import get_password_hash
 
 class UserService:
     def __init__(self, user_crud: UserCrud):

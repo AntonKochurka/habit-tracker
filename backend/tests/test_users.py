@@ -1,13 +1,18 @@
 import pytest
 
+from httpx import AsyncClient
 from apps.user.router import router 
 from apps.user.models import User
 from utils.paginator import Paginator
 
+from fastapi import FastAPI
+from apps.user.router import router
+from db import get_async_session
+
 @pytest.fixture
 async def client(session):
     app = FastAPI()
-    app.include_router(user, prefix="/users")
+    app.include_router(router, prefix="/users")
 
     app.dependency_overrides[get_async_session] = lambda: session
 

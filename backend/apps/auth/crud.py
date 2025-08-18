@@ -6,11 +6,15 @@ from sqlalchemy.exc import IntegrityError
 from db import AsyncSession
 from .models import BlacklistedToken
 
+
 class AuthCrud:
     def __init__(self, db: AsyncSession):
         self.db = db
 
-    async def blacklist_jti_token(self, jti: str, token_type: Literal['access', 'refresh']) -> BlacklistedToken:
+    async def blacklist_jti_token(
+        self, jti: str, 
+        token_type: Literal['access', 'refresh']
+    ) -> BlacklistedToken:
         """
         Insert a new blacklisted token row. If jti already exists, ignore.
         Returns the BlacklistedToken instance (new or existing).

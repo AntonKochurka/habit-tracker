@@ -1,15 +1,15 @@
-from typing import Any, Iterable, List, Optional, Tuple, Dict
+from typing import Any, List, Optional, Tuple, Dict
 from math import ceil
 
 from fastapi import HTTPException, status
 from pydantic import BaseModel
 
-import re
-
-from sqlalchemy import select, desc, asc
+from sqlalchemy import select, desc, asc, func
 from sqlalchemy.sql import Select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import InstrumentedAttribute
+
+from config import settings
 
 _SUFFIXES = {
     "lg": "gt",
@@ -64,12 +64,17 @@ class Paginator:
         field_name, op = self._parse_field(field)
 
         if field_name in self.forbiden_list:
-            raise HTTPException(detail=f"Field '{field_name}' cannot be filtrated", status_code=status.HTTP_403_FORBIDDEN)
+            raise HTTPException(
+                detail=f"Field '{field_name}' cannot be filtrated", 
+                status_code=status.HTTP_403_FORBIDDEN
+            )
 
         col = getattr(self.model, field_name, None)
         if col is None or not isinstance(col, InstrumentedAttribute):
-            raise HTTPException(detail=f"Unknown field '{field_name}'", status_code=status.HTTP_400_BAD_REQUEST)
-        
+            raise HTTPException(
+                detail=f"Unknown field '{field_name}'", 
+                status_code=status.HTTP_400_BAD_REQUEST
+            )        
         expr = self._build_expr(col, op, value)
         self._where.append(expr)
 
@@ -120,11 +125,7 @@ class Paginator:
             per_page = 1
 
         base_q = self._make_query()
-
-        count_q = base_q.with_only_columns(self.model.__table__.c[ list(self.model.__table__.c.keys())[0] ]).order_by(None)
-        total_result = await sess.execute(count_q)
-    
-        from sqlalchemy import func
+        
         count_stmt = select(func.count()).select_from(base_q.subquery())
         total = (await sess.execute(count_stmt)).scalar_one()
 
@@ -151,15 +152,11 @@ class Paginator:
         sess = session or self._session
         if sess is None:
             raise RuntimeError(...)
-        
         q = self._make_query().limit(1)
-        
         result = await sess.execute(q)
-        
         item = result.scalars().first()
         if self.ItemModel is not None and item is not None:
-            item = self.ItemModel(item)
-        
+            item = self.ItemModel(item)                    
         return item
 
     def _parse_field(self, field: str) -> Tuple[str, str]:
@@ -198,7 +195,8 @@ class Paginator:
             if isinstance(value, str):
                 value = [v.strip() for v in value.split(",") if v.strip()]
             if not isinstance(value, (list, tuple, set)):
-                raise ValueError("Value for 'in' must be an iterable or comma-separated string")
+                raise ValueError(
+                    "Value for 'in' must be an iterable or comma-separated string"
+                )
             return col.in_(value)
-
         return col == value

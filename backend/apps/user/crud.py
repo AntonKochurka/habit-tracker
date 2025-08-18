@@ -11,7 +11,7 @@ class UserCrud:
     def __init__(self, db: AsyncSession):
         self.db = db
 
-    async def create_user(self, data):
+    async def create_user(self, data: UserCreateRequest):
         instance = User(
             username=data.username,
             email=data.email,

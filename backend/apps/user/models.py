@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Boolean, Integer
+from sqlalchemy import Column, String, Boolean
 from db import Base, BaseMixin
 
 class User(Base, BaseMixin):

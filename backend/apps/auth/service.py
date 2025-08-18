@@ -1,4 +1,4 @@
-from fastapi import HTTPException, Response
+from fastapi import HTTPException, Response, status
 from datetime import datetime, timedelta, timezone
 from secrets import token_urlsafe
 
@@ -8,7 +8,7 @@ from config import settings
 from .crud import AuthCrud
 
 from apps.user.crud import UserCrud, User
-from utils.security import get_password_hash, verify_password
+from utils.security import verify_password
 
 class AuthService:
     def __init__(self, auth_crud: AuthCrud, user_crud: UserCrud):

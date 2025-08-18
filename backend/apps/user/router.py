@@ -1,6 +1,5 @@
 from typing import List, Dict, Any
 from fastapi import APIRouter, Depends, Query
-from fastapi.responses import JSONResponse
 
 from db import AsyncSession, get_async_session
 from utils.dependencies import create_filter_dependency
