@@ -18,7 +18,7 @@ export default function SignUpForm() {
     const onSubmit = async (values: SignUpValues) => {
         try {
             const { confirmPassword, ...data} = values
-            const response = await api.post("/user/create", data)
+            const response = await api.post("/users/", data)
 
             if (response.status === 201) {
                 await dispatch(loginThunk({identefier: data.username, password: data.password}))

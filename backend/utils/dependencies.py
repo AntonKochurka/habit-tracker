@@ -11,7 +11,7 @@ def _get_forbidden_list(model: DeclarativeMeta) -> Set[str]:
     if forb is None:
         forb = []
     
-    return forb
+    return set(forb)
 
 def create_filter_dependency(model: DeclarativeMeta) -> Callable:
     """

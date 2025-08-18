@@ -17,8 +17,7 @@ class UserCrud:
             email=data.email,
             password=data.password,
             is_active=True,
-            is_superuser=False,
-            is_deleted=False
+            is_superuser=False
         )
         
         self.db.add(instance)
@@ -27,7 +26,7 @@ class UserCrud:
             await self.db.commit()
             await self.db.refresh(instance)
             
-            return instance
+            return instance.to_dict()
         except IntegrityError:
             await self.db.rollback()
 

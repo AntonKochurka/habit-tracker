@@ -7,7 +7,6 @@ class UserBase(BaseModel):
 
     is_active: bool = True
     is_superuser: bool = False
-    is_deleted: bool = False
 
 
 class UserCreateRequest(UserBase):
@@ -19,7 +18,6 @@ class UserUpdateRequest(BaseModel):
 
     is_active: bool | None = None
     is_superuser: bool | None = None
-    is_deleted: bool | None = None
 
 class UserUpdatePasswordRequest(BaseModel):
     old_password: constr(min_length=6)
@@ -28,7 +26,10 @@ class UserUpdatePasswordRequest(BaseModel):
 class UserRead(UserBase):
     id: int
     created_at: datetime
-    updated_at: datetime
+    updated_at: datetime | None
 
     class Config:
         from_attributes = True
+
+class UserAdmin(UserRead):
+    password: str

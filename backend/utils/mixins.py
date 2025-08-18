@@ -1,6 +1,8 @@
 from sqlalchemy import Column, Integer, DateTime, func
 from sqlalchemy.orm import declarative_mixin
 
+from datetime import datetime
+
 @declarative_mixin
 class BaseMixin:
     id = Column(Integer, primary_key=True, index=True)
@@ -25,6 +27,14 @@ class BaseMixin:
             key = column.key
             if with_forbidden_list and key in forbidden:
                 continue
-            result[key] = getattr(self, key)
+
+            value = getattr(self, key)
+            if isinstance(value, DateTime):
+                result[key] = datetime(value).isoformat()
+            elif value is None:
+                result[key] = None
+            else:
+                result[key] = value
+
 
         return result

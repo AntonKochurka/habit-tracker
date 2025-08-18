@@ -1,8 +1,9 @@
-from typing import List
+from typing import List, Dict, Any
 from fastapi import APIRouter, Depends, Query
 from fastapi.responses import JSONResponse
 
 from db import AsyncSession, get_async_session
+from utils.dependencies import create_filter_dependency
 
 from .models import User
 from .schemas import UserRead, UserCreateRequest
@@ -20,4 +21,11 @@ async def get_users_list(
     page: int = Query(1, ge=1),
     service: UserService = Depends(get_service),
 ):
-    ...
+    return await service.user_crud.get_users(page, filters)
+
+@router.post("/")
+async def create_user(
+    data: UserCreateRequest,
+    service: UserService = Depends(get_service)
+):
+    return UserRead(**await service.create_user(data))
