@@ -3,7 +3,6 @@ import { signInSchema, type SignInValues } from "../service/validation";
 import { FormInput } from "@shared/components/form_input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Link } from "react-router-dom";
-import api from "@shared/api";
 import { useAppDispatch } from "@shared/store";
 import { loginThunk } from "../redux/thunks";
 
@@ -18,11 +17,7 @@ export default function SignInForm() {
     const onSubmit = async (values: SignInValues) => {
         try {
             const { confirmPassword, ...data} = values
-            const response = await api.post("/auth/obtain", data)
-
-            if (response.status === 201) {
-                await dispatch(loginThunk({identefier: data.username, password: data.password}))
-            }
+            await dispatch(loginThunk({identefier: data.username, password: data.password}))
         } catch (error) {
             
         }

@@ -1,5 +1,5 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import type { AuthState, Credentials, TokenResponse } from "../service/types";
+import type { Credentials, TokenResponse } from "../service/types";
 import api from "@shared/api";
 
 export const loginThunk = createAsyncThunk(
@@ -7,6 +7,7 @@ export const loginThunk = createAsyncThunk(
   async (credentials: Credentials, { rejectWithValue }) => {
     try {
       const response = await api.post<TokenResponse>("/auth/obtain", credentials);
+
       return response.data;
     } catch (error: any) {
       return rejectWithValue(
@@ -18,12 +19,10 @@ export const loginThunk = createAsyncThunk(
 
 export const refreshThunk = createAsyncThunk(
   "auth/refresh",
-  async (_, { getState, rejectWithValue }) => {
+  async (_, { rejectWithValue }) => {
     try {
-      const { auth } = getState() as { auth: AuthState };
-      const response = await api.post<TokenResponse>("/auth/refresh", {
-        refresh: auth.refreshToken,
-      });
+      const response = await api.post<TokenResponse>("/auth/refresh");
+      
       return response.data;
     } catch (error: any) {
       return rejectWithValue(

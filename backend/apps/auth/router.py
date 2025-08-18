@@ -7,8 +7,10 @@ from .crud import AuthCrud
 from .service import AuthService
 from .dependencies import refresh_token
 
+from apps.user.crud import UserCrud
+
 async def get_service(db: AsyncSession = Depends(get_async_session)):
-    return AuthService(AuthCrud(db))
+    return AuthService(AuthCrud(db), UserCrud(db))
 
 router = APIRouter(prefix="/auth")
 
@@ -18,9 +20,10 @@ async def obtain_pair(
     data: ObtainPairRequest,
     service: AuthService = Depends(get_service),
 ):
-    # HERE SHOULD BE SIGN IN
+    user_id = await service.verify_user(username=data.identifier, password=data.password)
 
-    user_id = 1
+    if user_id is None:
+        raise HTTPException(detail="User doesn't exist", status_code=status.HTTP_404_NOT_FOUND)
 
     _, access = service.encode_token(user_id, token_type="access")
     expires, refresh = service.encode_token(user_id, token_type="refresh")

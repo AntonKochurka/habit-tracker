@@ -7,9 +7,13 @@ import jwt
 from config import settings
 from .crud import AuthCrud
 
+from apps.user.crud import UserCrud, User
+from utils.security import get_password_hash, verify_password
+
 class AuthService:
-    def __init__(self, auth_crud: AuthCrud):
+    def __init__(self, auth_crud: AuthCrud, user_crud: UserCrud):
         self.auth_crud = auth_crud
+        self.user_crud = user_crud
 
     def _now_ts(self) -> int:
         return int(datetime.now(tz=timezone.utc).timestamp())
@@ -82,3 +86,15 @@ class AuthService:
             samesite="lax",
             path="/",
         )
+
+    async def verify_user(self, username, password) -> User | None:
+        """
+        Returns user id if password is correct
+        If not, None
+        """
+        user = await self.user_crud.get_user_by("username", username)
+
+        if user is None:
+            raise HTTPException(detail="User with this username does'nt exist", status_code=status.HTTP_404_NOT_FOUND)
+        
+        return user.id if verify_password(password, user.password) else None

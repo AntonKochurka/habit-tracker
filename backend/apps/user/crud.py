@@ -49,4 +49,4 @@ class UserCrud:
     async def get_user_by(self, field: str, value):
         """Get one single user or none"""
 
-        return await (Paginator(User).filtrate(field, value).first())
+        return await (Paginator(User, session=self.db).filtrate(field, value).first())

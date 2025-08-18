@@ -6,8 +6,7 @@ import { loginThunk, refreshThunk } from "./thunks";
 
 export const AUTH_REDUX_KEY = "auth"
 const initialState: AuthState = {
-  accessToken: null,
-  refreshToken: null,
+  access: null,
   status: LoadingStatus.IDLE,
   error: null,
 };
@@ -17,8 +16,7 @@ const authSlice = createSlice({
   initialState,
   reducers: {
     logout: (state) => {
-      state.accessToken = null;
-      state.refreshToken = null;
+      state.access = null;
       state.status = "idle";
       state.error = null;
     },
@@ -35,8 +33,7 @@ const authSlice = createSlice({
 
       .addCase(loginThunk.fulfilled, (state, action: PayloadAction<TokenResponse>) => {
         state.status = "succeeded";
-        state.accessToken = action.payload.access;
-        state.refreshToken = action.payload.refresh;
+        state.access = action.payload.access;
       })
 
       .addCase(loginThunk.rejected, (state, action) => {
@@ -50,14 +47,12 @@ const authSlice = createSlice({
       })
       .addCase(refreshThunk.fulfilled, (state, action: PayloadAction<TokenResponse>) => {
         state.status = "succeeded";
-        state.accessToken = action.payload.access;
-        state.refreshToken = action.payload.refresh;
+        state.access = action.payload.access;
       })
       .addCase(refreshThunk.rejected, (state, action) => {
         state.status = "failed";
         state.error = action.payload as string;
-        state.accessToken = null;
-        state.refreshToken = null;
+        state.access = null;
       });
   },
 });
@@ -65,7 +60,7 @@ const authSlice = createSlice({
 
 export const { logout, clearError } = authSlice.actions;
 
-export const selectAccessToken = (state: { auth: AuthState }) => state.auth.accessToken;
+export const selectAccessToken = (state: { auth: AuthState }) => state.auth.access;
 export const selectAuthStatus = (state: { auth: AuthState }) => state.auth.status;
 export const selectAuthError = (state: { auth: AuthState }) => state.auth.error;
 

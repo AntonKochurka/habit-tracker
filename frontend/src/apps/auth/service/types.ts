@@ -7,8 +7,7 @@ export interface User extends Model {
 }
 
 export interface AuthState {
-    accessToken: string | null;
-    refreshToken: string | null;
+    access: string | null;
     status: LoadingStatus;
     error: string | null;
 }
