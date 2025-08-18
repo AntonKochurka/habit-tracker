@@ -3,6 +3,10 @@ import { z } from "zod";
 export const signInSchema = z.object({
   username: z.string(),
   password: z.string().min(6, "At least 6 characters"),
+  confirmPassword: z.string().min(6, "At least 6 characters"),
+}).refine((data) => data.password === data.confirmPassword, {
+  path: ["confirmPassword"],
+  message: "Passwords do not match",
 });
 
 export type SignInValues = z.infer<typeof signInSchema>;
