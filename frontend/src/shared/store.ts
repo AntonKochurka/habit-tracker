@@ -1,10 +1,12 @@
 import { AUTH_REDUX_KEY, authReducer } from "@app/auth/redux";
 import { configureStore } from "@reduxjs/toolkit";
 import { useDispatch, useSelector } from "react-redux";
+import { MODAL_REDUX_KEY, modalReducer } from "./modals/redux";
 
 export const store = configureStore({
   reducer: {
-    [AUTH_REDUX_KEY]: authReducer
+    [AUTH_REDUX_KEY]: authReducer,
+    [MODAL_REDUX_KEY]: modalReducer
   },
 });
 

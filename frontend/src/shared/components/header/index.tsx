@@ -1,12 +1,23 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import ThemeToggle from "./theme_toggle";
+import { showModal } from "@shared/modals/service/service";
+import { ModalKeys } from "@shared/modals/service/types";
 
 export default function Header() {
+  const navigate = useNavigate();
+
   const navItems = [
-    { title: "About", to: "/about" },
-    { title: "Features", to: "/features" },
-    { title: "Pricing", to: "/pricing" },
-    { title: "Contact", to: "/contact" },
+    { title: "Home", onClick: () => {navigate("/about")} },
+    { title: "Folders", onClick: () => {
+      showModal(
+        ModalKeys.CREATE_FOLDER, 
+        {
+          title: "Create Folder"
+        }
+      )
+    } },
+    { title: "Pricing", onClick: () => {navigate("/pricing")} },
+    { title: "Contact", onClick: () => {navigate("/contact")} },
   ];
 
   return (
@@ -26,12 +37,12 @@ export default function Header() {
             <ul className="flex items-center gap-6">
               {navItems.map((item, index) => (
                 <li key={index}>
-                  <Link
-                    to={item.to}
+                  <button
+                    onClick={item.onClick}
                     className="text-gray-600  hover:text-sky-500 dark:text-gray-300 dark:hover:text-sky-400 transition-colors font-medium text-sm"
                   >
                     {item.title}
-                  </Link>
+                  </button>
                 </li>
               ))}
             </ul>
