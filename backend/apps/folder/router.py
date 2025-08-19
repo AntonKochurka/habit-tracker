@@ -6,7 +6,7 @@ from .schemas import BaseFolder
 from .crud import FolderCrud
 from .service import FolderService
 
-async def get_service(db: AsyncSession):
+async def get_service(db: AsyncSession = Depends(get_async_session)):
     return FolderService(FolderCrud(db))
 
 

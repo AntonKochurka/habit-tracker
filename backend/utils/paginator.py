@@ -25,8 +25,8 @@ _SUFFIXES = {
 
 class Paginator:
     def __init__(
-        self, 
-        model, 
+        self,
+        model,
         *, 
         forbiden_list: list = None, 
         item_model: BaseModel = None,

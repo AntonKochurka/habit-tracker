@@ -1,7 +1,6 @@
-from sqlalchemy import Column, String, Boolean, Integer, Enum, JSON
+from sqlalchemy import Column, String, Boolean, Integer, Enum, ForeignKey, DateTime, func
 from sqlalchemy.orm import relationship
 from enum import Enum as PyEnum
-from typing import Optional
 from db import Base, BaseMixin
 
 class HabitType(PyEnum):
