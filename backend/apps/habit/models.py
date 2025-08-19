@@ -32,7 +32,6 @@ class Habit(Base, BaseMixin):
     is_completed = Column(Boolean, default=False)
     
     target_value = Column(Integer, nullable=True)  
-    current_value = Column(Integer, nullable=True, default=0)  
     
     active_days = Column(String(15), nullable=True) 
     
@@ -42,6 +41,7 @@ class HabitRecord(Base, BaseMixin):
     habit_id = Column(Integer, ForeignKey('habits.id'), nullable=False)
     user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
     
+    current_value = Column(Integer, nullable=True, default=0)  
     completed_at = Column(DateTime(timezone=True), server_default=func.now())
     value_achieved = Column(Integer, nullable=True)  # TODO: percentage of success
         # for example target_value = 60(seconds or tries)

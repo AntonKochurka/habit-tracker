@@ -7,7 +7,6 @@ class Folder(Base, BaseMixin):
 
     title = Column(String(50), unique=True, index=True, nullable=False)
     color = Column(String(20), nullable=False, default="#ffffff")
-    is_public = Column(Boolean, default=False)
     
     author_id = Column(Integer, ForeignKey('users.id'), nullable=False)
     author = relationship("User", back_populates="folders")
