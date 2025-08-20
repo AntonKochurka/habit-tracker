@@ -4,7 +4,7 @@ from fastapi import HTTPException, status
 
 from .crud import FolderCrud
 from .schemas import BaseFolder
-from apps.user.crud import UserCrud
+from apps.user.crud import UserCrud, User
 
 class FolderService:
     def __init__(self, folder_crud: FolderCrud, user_crud: UserCrud):
@@ -33,10 +33,11 @@ class FolderService:
         
         return color
     
-    async def create_folder(self, data: BaseFolder):
+    async def create_folder(self, data: BaseFolder, user: User):
         """Create a folder instance"""
         data.color = self._check_color(data.color)
-        
+        data.author_id = user.id
+
         if not self.user_crud.get_user_by("id", data.author_id):
             raise HTTPException(
                 detail="User doesn't exist", 

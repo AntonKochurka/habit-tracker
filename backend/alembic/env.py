@@ -23,6 +23,8 @@ if config.config_file_name is not None:
 # for 'autogenerate' support
 from apps.auth.models import BlacklistedToken
 from apps.user.models import User
+from apps.folder.models import folder_habit_relationships, Folder
+from apps.habit.models import Habit, HabitRecord
 
 target_metadata = BlacklistedToken.metadata
 

@@ -6,12 +6,11 @@ import { changePasswordSchema, type ChangePasswordValues } from "../service/vali
 type Props = {
     id: string;
     title?: string;
-    onResolve: () => void;
     onCancel: () => void;
 }
 
 export default function ChangePasswordModal({
-    title, onResolve, onCancel
+    title, onCancel
 }: Props) {
     const {
         register,
@@ -22,7 +21,7 @@ export default function ChangePasswordModal({
     const onSubmit = async (values: ChangePasswordValues) => {
         try {
             console.log(values);
-            onResolve();
+            // onResolve();
         } catch (error) {
             console.error(error);
         }

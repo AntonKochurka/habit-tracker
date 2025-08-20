@@ -4,16 +4,16 @@ import { FormInput } from "@shared/components/form_input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Field, Input, Label } from "@headlessui/react";
 import { HexColorPicker } from "react-colorful";
+import api from "@shared/api";
 
 type Props = {
     id: string;
     title?: string;
-    onResolve: () => void;
     onCancel: () => void;
 }
 
 export default function FolderModal({
-    title, onResolve, onCancel
+    title, onCancel
 }: Props) {
     const {
         watch,
@@ -26,7 +26,12 @@ export default function FolderModal({
     const onSubmit = async (values: FolderCreateValues) => {
         try {
             console.log(values);
-            onResolve();
+            
+            const response = await api.post("/folders")
+            
+            if (response.status === 201) {
+                onCancel()
+            }
         } catch (error) {
             console.error(error);
         }

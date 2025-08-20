@@ -20,7 +20,7 @@ async def obtain_pair(
     user_id = await service.verify_user(username=data.identifier, password=data.password)
 
     if user_id is None:
-        raise HTTPException(detail="User doesn't exist", status_code=status.HTTP_404_NOT_FOUND)
+        raise HTTPException(detail="Password isn't correct", status_code=status.HTTP_400_BAD_REQUEST)
 
     _, access = service.encode_token(user_id, token_type="access")
     expires, refresh = service.encode_token(user_id, token_type="refresh")

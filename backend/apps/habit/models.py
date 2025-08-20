@@ -32,13 +32,19 @@ class Habit(Base, BaseMixin):
     
     target_value = Column(Integer, nullable=True)  
     
+    folders = relationship(
+        "Folder",
+        secondary="folder_habit_relationships",
+        back_populates="habits"
+    )
+    records = relationship("HabitRecord", back_populates="habit", cascade="all, delete-orphan")
+
     active_days = Column(String(15), nullable=True) 
     
 class HabitRecord(Base, BaseMixin):
     __tablename__ = "habit_records"
     
     habit_id = Column(Integer, ForeignKey('habits.id'), nullable=False)
-    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
     
     current_value = Column(Integer, nullable=True, default=0)  
     completed_at = Column(DateTime(timezone=True), server_default=func.now())
@@ -48,4 +54,3 @@ class HabitRecord(Base, BaseMixin):
         # value_achieved = 50 (%) because i've done a half of required task
 
     habit = relationship("Habit", back_populates="records")
-    user = relationship("User", back_populates="habit_records")
