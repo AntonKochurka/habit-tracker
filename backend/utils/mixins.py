@@ -2,6 +2,7 @@ from typing import Union, List
 from sqlalchemy import Column, Integer, DateTime, func
 from sqlalchemy.orm import declarative_mixin, RelationshipProperty
 from datetime import datetime
+from sqlalchemy.inspection import inspect
 
 @declarative_mixin
 class BaseMixin:
@@ -29,7 +30,6 @@ class BaseMixin:
                 True - DO include ALL relationships.
                 List[str] - include only these one, which is written in list.
         """
-        from sqlalchemy.inspection import inspect
 
         mapper = inspect(self.__class__)
         result = {}
@@ -41,7 +41,7 @@ class BaseMixin:
                 continue
 
             value = getattr(self, key)
-            if isinstance(value, datetime):
+            if isinstance(value, DateTime):
                 result[key] = value.isoformat()
             elif value is None:
                 result[key] = None

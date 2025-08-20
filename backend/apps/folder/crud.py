@@ -3,8 +3,10 @@ from fastapi import HTTPException, status
 from db import AsyncSession
 from sqlalchemy.exc import IntegrityError
 
-from .schemas import BaseFolder
 from .models import Folder
+from .schemas import BaseFolder, FolderRead
+
+from utils.paginator import Paginator
 
 class FolderCrud:
     def __init__(self, db: AsyncSession):
@@ -31,3 +33,16 @@ class FolderCrud:
                 detail="Folder arleady exists", 
                 status_code=status.HTTP_409_CONFLICT
             )
+
+    async def get_folders(self, page, filters):
+        """
+        Get folder list with pagination utils.
+        """
+        
+        pg = Paginator(
+            Folder, item_model=FolderRead, session=self.db
+        )
+        
+        pg.filtrate_by_dict(filters)
+
+        return await pg.paginate(page=page)

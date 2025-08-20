@@ -4,8 +4,11 @@ from math import ceil
 from fastapi import HTTPException, status
 from pydantic import BaseModel
 
+from sqlalchemy.inspection import inspect
 from sqlalchemy import select, desc, asc, func
 from sqlalchemy.sql import Select
+
+from sqlalchemy import Integer, Float, Boolean
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import InstrumentedAttribute
 
@@ -53,8 +56,36 @@ class Paginator:
     def filtrate_by_dict(self, filters: Dict):
         """filtrating by {'field':'value'} dict"""
 
-        for field, value in filters.keys():
-            self.filtrate(field, value)
+        model_columns = {c.key: c for c in inspect(self.model).columns}
+        types = (
+            (Integer, int,),
+            (Float, float,),
+            (Boolean, bool,),
+        ) 
+
+        for field, value in filters.items():
+            if field.endswith("__in"):
+                value = [v.strip() for v in value.strip().split(",")]
+
+            col_type = model_columns[self._parse_field(field)[0]].type
+            try: 
+                for sqltype, _type in types:
+                    if isinstance(col_type, sqltype):
+                        if isinstance(value, list):
+                            value = [_type(v) for v in value]
+                        else:
+                            value = _type(value)
+                    else:
+                        continue
+
+                self.filtrate(field, value)
+            except Exception as e:
+                raise HTTPException(
+                    detail=f"Cannot convert value '{value}' for field '{field_name}': {e}",
+                    status_code=status.HTTP_400_BAD_REQUEST
+                )
+        
+        return self
 
     def filtrate(self, field: str, value: Any):
         """
@@ -137,7 +168,7 @@ class Paginator:
         items = result.scalars().all()
 
         if self.ItemModel is not None:
-            items = [self.ItemModel(item) for item in items]
+            items = [self.ItemModel(**item.to_dict()) for item in items]
 
         return {
             "items": items,

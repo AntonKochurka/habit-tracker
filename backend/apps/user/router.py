@@ -14,7 +14,7 @@ async def get_service(db: AsyncSession = Depends(get_async_session)):
 
 router = APIRouter(prefix="/users")
 
-@router.get("", response_model=List[UserRead])
+@router.get("")
 async def get_users_list(
     filters: Dict[str, Any] = Depends(create_filter_dependency(User)),
     page: int = Query(1, ge=1),

@@ -14,7 +14,5 @@ class FolderRead(BaseFolder):
     created_at: datetime
     updated_at: datetime | None
 
-    author: Dict
-
     class Config:
         from_attributes = True
