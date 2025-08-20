@@ -17,7 +17,7 @@ export default function SignInForm() {
     const onSubmit = async (values: SignInValues) => {
         try {
             const { confirmPassword, ...data} = values
-            await dispatch(loginThunk({identefier: data.username, password: data.password}))
+            await dispatch(loginThunk({identifier: data.username, password: data.password}))
         } catch (error) {
             
         }

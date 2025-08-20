@@ -12,8 +12,10 @@ const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
-  const state = store.getState()
-  const token = state.auth;
+  const state = store.getState();
+  const token = state.auth.access;
+
+  console.log(token);
 
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
@@ -29,7 +31,7 @@ let failedRequestsQueue: Array<{
 }> = [];
 
 api.interceptors.response.use(
-  (response) => response.data,
+  (response) => response,
   async (error) => {
     const originalRequest = error.config;
 

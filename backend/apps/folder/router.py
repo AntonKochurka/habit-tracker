@@ -15,10 +15,10 @@ async def get_service(db: AsyncSession = Depends(get_async_session)):
 router = APIRouter(prefix="/folders")
 
 
-@router.post("/")
+@router.post("/", status_code=201)
 async def create_new_folder(
     data: BaseFolder,
     service: FolderService = Depends(get_service),
     user: User = Depends(get_current_user)
 ):
-    return service.create_folder(data, user)
+    return await service.create_folder(data, user)

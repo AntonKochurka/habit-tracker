@@ -1,6 +1,6 @@
 import type { LoadingStatus, Model } from "@shared/types";
 
-export interface Credentials {identefier: string, password: string}
+export interface Credentials {identifier: string, password: string}
 
 export interface User extends Model {
     username: string;

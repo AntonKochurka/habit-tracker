@@ -7,7 +7,7 @@ from datetime import datetime
 class BaseFolder(BaseModel):
     title: str
     color: str
-    author_id: int
+    author_id: int | None = None
 
 class FolderRead(BaseFolder):
     id: int

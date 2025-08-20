@@ -44,4 +44,4 @@ class FolderService:
                 status_code=status.HTTP_404_NOT_FOUND
             )
         
-        return self.folder_crud.create_folder(data)
+        return await self.folder_crud.create_folder(data)

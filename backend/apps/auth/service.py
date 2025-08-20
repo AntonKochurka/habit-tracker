@@ -3,6 +3,7 @@ from datetime import datetime, timedelta, timezone
 from secrets import token_urlsafe
 
 import jwt
+import uuid
 
 from config import settings
 from .crud import AuthCrud
@@ -37,7 +38,7 @@ class AuthService:
             "type": token_type,
             "iat": iat_ts,
             "exp": exp_ts,
-            "jti": token_urlsafe(32),
+            "jti": str(uuid.uuid4()),
         }
 
         token = jwt.encode(payload, settings.SECRET_KEY, algorithm=settings.JWT_ALGORITHM)
@@ -55,7 +56,7 @@ class AuthService:
             raise HTTPException(status_code=401, detail="Token expired")
         except jwt.InvalidTokenError:
             raise HTTPException(status_code=401, detail="Invalid token")
-
+        
         jti = payload.get("jti")
         if not jti:
             raise HTTPException(status_code=401, detail="Missing jti in token")
@@ -63,7 +64,7 @@ class AuthService:
         blacklisted = await self.auth_crud.is_jti_blacklisted(jti)
         if blacklisted:
             raise HTTPException(status_code=401, detail="Token is blacklisted")
-        
+
         return payload
 
     async def decode_token_id(self, token) -> int:
@@ -101,6 +102,6 @@ class AuthService:
 
     async def get_current_user(self, token) -> User | None:
         """Returns user by token"""
-        user_id = self.decode_token_id(token)
+        user_id = await self.decode_token_id(token)
         
-        return (await self.user_crud.get_user_by("id", user_id))
+        return await self.user_crud.get_user_by("id", user_id)

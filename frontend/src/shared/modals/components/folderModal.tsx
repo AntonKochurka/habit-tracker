@@ -27,7 +27,7 @@ export default function FolderModal({
         try {
             console.log(values);
             
-            const response = await api.post("/folders")
+            const response = await api.post("/folders", values)
             
             if (response.status === 201) {
                 onCancel()

@@ -21,9 +21,10 @@ async def get_service(db: AsyncSession = Depends(get_async_session)):
     return AuthService(AuthCrud(db), UserCrud(db))
 
 async def get_current_user(
-    access_token: str | None = Depends(access_token),
+    access: HTTPAuthorizationCredentials = Depends(access_token),
     service: AuthService = Depends(get_service)
 ) -> User | None:
+    access_token = access.credentials
     if access_token is None:
         raise HTTPException(status_code=401, detail="Unauthorized")
 

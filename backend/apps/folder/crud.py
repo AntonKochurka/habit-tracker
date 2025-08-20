@@ -17,7 +17,7 @@ class FolderCrud:
             author_id=data.author_id
         )
 
-        await self.db.add(instance)
+        self.db.add(instance)
         
         try:
             await self.db.commit()

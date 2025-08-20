@@ -33,6 +33,8 @@ const authSlice = createSlice({
 
       .addCase(loginThunk.fulfilled, (state, action: PayloadAction<TokenResponse>) => {
         state.status = "succeeded";
+        console.log("[ redux/auth ]: HERE");
+        console.log(action)
         state.access = action.payload.access;
       })
 
