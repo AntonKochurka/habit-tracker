@@ -1,4 +1,4 @@
-import type { LoadingStatus, Model } from "@shared/types";
+import type { BaseState, Model } from "@shared/types";
 
 export interface Credentials {identifier: string, password: string}
 
@@ -6,10 +6,8 @@ export interface User extends Model {
     username: string;
 }
 
-export interface AuthState {
+export interface AuthState extends BaseState {
     access: string | null;
-    status: LoadingStatus;
-    error: string | null;
 }
 
 export interface TokenResponse {

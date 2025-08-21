@@ -14,5 +14,10 @@ export type LoadingStatus =
 export interface Model {
   id: number;
   created_at: string;
-  updated_at: string;
+  updated_at: string | null;
+}
+
+export interface BaseState {
+  status: LoadingStatus;
+  error: string | null;
 }
