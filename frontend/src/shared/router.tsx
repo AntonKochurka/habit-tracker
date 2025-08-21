@@ -3,6 +3,7 @@ import Layout from "./components/layout";
 import SignUp from "@app/auth/pages/signup";
 import SignIn from "@app/auth/pages/signin";
 import SingleFolderPage from "@app/folders/page/single";
+import HomePage from "@app/home/page";
 
 export let router = createBrowserRouter([
     {
@@ -18,6 +19,7 @@ export let router = createBrowserRouter([
             },
             {
                 path: "home",
+                element: <HomePage/>,
                 children: [
                     {path: "folder/:id", element: <SingleFolderPage />},
                     // {path: "habit/:id", element: <SingleHabitPage />}

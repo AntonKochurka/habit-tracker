@@ -7,7 +7,7 @@ export default function Header() {
   const navigate = useNavigate();
 
   const navItems = [
-    { title: "Home", onClick: () => {navigate("/about")} },
+    { title: "Home", onClick: () => {navigate("/home")} },
     { title: "Folders", onClick: () => {
       showModal(
         ModalKeys.CREATE_FOLDER, 

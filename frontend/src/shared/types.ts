@@ -21,3 +21,17 @@ export interface BaseState {
   status: LoadingStatus;
   error: string | null;
 }
+
+export interface Pagination {
+  filters: Record<string, any>;
+  page: number;
+  hasMore: boolean;
+}
+
+export interface PaginationResponse<T> {
+  items: T[];
+  total: number;
+  page: number;
+  pages: number;
+  per_page: number;
+}
