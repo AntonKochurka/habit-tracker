@@ -24,7 +24,8 @@ const foldersSlice = createSlice({
     name: FOLDERS_REDUX_KEY,
     initialState: initialState,
     reducers: {
-        
+        addOne: foldersAdapter.addOne,
+        addMany: foldersAdapter.addMany,
     },
     extraReducers: (builder) => {
         builder
@@ -50,6 +51,7 @@ const foldersSlice = createSlice({
 
 
 export const foldersReducer = foldersSlice.reducer;
+export const foldersActions = foldersSlice.actions;
 
 export const getFolders = (state: { folders: FoldersState}) => state.folders.entities;
 export const getFoldersState = (state: { folders: FoldersState}) => state.folders;

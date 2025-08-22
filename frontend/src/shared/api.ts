@@ -34,13 +34,40 @@ api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
+    const status = error.response?.status;
+    const data = error.response?.data;
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    const isAuthFailure = (respData: any, resp?: any) => {
+      const detail = respData?.detail ?? respData?.message ?? "";
+      const lower = String(detail).toLowerCase();
+
+      if (
+        lower.includes("not authenticated") ||
+        lower.includes("token has expired") ||
+        lower.includes("invalid token") ||
+        lower.includes("unauthenticated")
+      ) return true;
+
+      const www = resp?.headers?.["www-authenticate"] ?? "";
+      if (String(www).toLowerCase().includes("bearer")) return true;
+
+      if (respData?.code && String(respData.code).toLowerCase().includes("not_authenticated")) return true;
+
+      return false;
+    };
+
+    const shouldTryRefresh = (
+      (status === 401) ||
+      (status === 403 && isAuthFailure(data, error.response))
+    ) && !originalRequest._retry;
+
+    if (shouldTryRefresh) {
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedRequestsQueue.push({ resolve, reject });
         })
           .then((token) => {
+            originalRequest.headers = originalRequest.headers || {};
             originalRequest.headers.Authorization = `Bearer ${token}`;
             return api(originalRequest);
           })
@@ -52,43 +79,37 @@ api.interceptors.response.use(
 
       try {
         const result = await store.dispatch(refreshThunk()).unwrap();
-        
-        originalRequest.headers.Authorization = `Bearer ${result.access}`;
-        
-        failedRequestsQueue.forEach(({ resolve }) => resolve(result.access));
+        const newAccess = result.access;
+
+        originalRequest.headers = originalRequest.headers || {};
+        originalRequest.headers.Authorization = `Bearer ${newAccess}`;
+
+        failedRequestsQueue.forEach(({ resolve }) => resolve(newAccess));
         failedRequestsQueue = [];
-        
+
         return api(originalRequest);
       } catch (refreshError) {
         failedRequestsQueue.forEach(({ reject }) => reject(refreshError));
         failedRequestsQueue = [];
-
         store.dispatch(logout());
-
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;
       }
     }
 
-    // Handle other errors
+    if (status === 403) {
+      return Promise.reject(new Error(data?.detail ?? data?.message ?? "Forbidden"));
+    }
+
     if (error.response) {
-      const { status, data } = error.response;
-      const message = data?.message || "An error occurred";
-
-      if (status === 403) {
-        console.warn("Forbidden action attempted");
-      }
-
-      if (status >= 500) {
-        console.error("Server error:", data);
-      }
-
-      throw new Error(message);
+      const message = data?.message ?? data?.detail ?? "An error occurred";
+      if (status >= 500) console.error("Server error:", data);
+      return Promise.reject(new Error(message));
     }
 
     if (error.message === "Network Error") {
-      console.error("Network Error: Please check your internet connection");
+      console.error("Network Error: check your connection");
     }
 
     return Promise.reject(error);

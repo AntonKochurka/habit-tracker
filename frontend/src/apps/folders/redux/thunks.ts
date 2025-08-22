@@ -8,7 +8,7 @@ export const fetchFoldersPage = createAsyncThunk<
   number,
   { rejectValue: string }
 >("folders/fetchPage", async (page, { rejectWithValue }) => {
-  try {
+  try {    
     const res = await api.get(`/folders?page=${page}`);
     
     return res.data;

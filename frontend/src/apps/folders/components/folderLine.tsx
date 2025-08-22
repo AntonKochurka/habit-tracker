@@ -15,24 +15,21 @@ export default function FolderLine({ folder, isOpen = false }: Props) {
 
   return (
     <div className="flex flex-col w-full">
-      <div
-        className="flex items-center justify-between cursor-pointer py-2 px-4"
-        onClick={toggleOpen}
-      >
-        <div
-          className={`transition-transform duration-200 ${
-            open ? "rotate-90" : ""
-          }`}
+      <div className="flex items-center w-full py-2 px-4">
+        <div 
+          onClick={toggleOpen} 
+          className="cursor-pointer flex items-center" 
+          style={{ color: folder.color }}
         >
-          ▶
+          <span className={`transition-transform duration-200 ${open ? "rotate-90" : ""}`}>
+            ▶
+          </span>
+          <span className="ml-2 font-medium">{folder.title}</span>
         </div>
-
-        <div className="ml-2 font-medium" style={{ color: folder.color }}>
-          {folder.title}
+        <div className="flex-grow ml-2">
+          <hr className="m-0" style={{ borderTop: `1px solid ${folder.color}` }} />
         </div>
       </div>
-
-      <hr className="border-t border-gray-300 w-full" />
 
       {open && (
         <div className="pl-6 pt-2">

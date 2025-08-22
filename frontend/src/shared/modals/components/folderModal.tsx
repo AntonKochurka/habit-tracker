@@ -5,6 +5,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Field, Input, Label } from "@headlessui/react";
 import { HexColorPicker } from "react-colorful";
 import api from "@shared/api";
+import { useAppDispatch } from "@shared/store";
+import { foldersActions } from "@app/folders/redux";
 
 type Props = {
     id: string;
@@ -15,6 +17,7 @@ type Props = {
 export default function FolderModal({
     title, onCancel
 }: Props) {
+    const dispatch = useAppDispatch();
     const {
         watch,
         register,
@@ -27,9 +30,10 @@ export default function FolderModal({
         try {
             console.log(values);
             
-            const response = await api.post("/folders", values)
+            const response = await api.post("/folders/", values)
             
             if (response.status === 201) {
+                dispatch(foldersActions.addOne(response.data))
                 onCancel()
             }
         } catch (error) {
