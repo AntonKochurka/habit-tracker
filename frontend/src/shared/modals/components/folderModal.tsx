@@ -4,10 +4,9 @@ import { FormInput } from "@shared/components/form_input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Field, Input, Label } from "@headlessui/react";
 import { HexColorPicker } from "react-colorful";
-import api from "@shared/api";
+import api, { getErrorMessage } from "@shared/api";
 import { useAppDispatch } from "@shared/store";
 import { foldersActions } from "@app/folders/redux";
-import { AxiosError } from "axios";
 import { toastBus } from "@shared/bus";
 
 type Props = {
@@ -39,10 +38,7 @@ export default function FolderModal({
                 onCancel()
             }
         } catch (error) {
-            console.error(error);
-            if (error instanceof AxiosError) {
-                toastBus.emit({message: error.response?.data.detail || "Unknown error", type: "error"})
-            }
+            toastBus.emit({message: getErrorMessage(error), type: "error"})
         }
     }
 

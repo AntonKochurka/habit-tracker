@@ -5,6 +5,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Link, useNavigate } from "react-router-dom";
 import { useAppDispatch } from "@shared/store";
 import { loginThunk } from "../redux/thunks";
+import { toastBus } from "@shared/bus";
+import { getErrorMessage } from "@shared/api";
 
 export default function SignInForm() {
     const { 
@@ -17,13 +19,17 @@ export default function SignInForm() {
 
     const onSubmit = async (values: SignInValues) => {
         try {
-            const { confirmPassword, ...data} = values
-            await dispatch(loginThunk({identifier: data.username, password: data.password}))
-            navigate("/home")
+            const { confirmPassword, ...data } = values;
+
+            await dispatch(loginThunk({ identifier: data.username, password: data.password })).unwrap();
+
+            navigate("/home");
         } catch (error) {
-            
+            toastBus.emit({ message: getErrorMessage(error), type: "error" });
         }
-    }
+    };
+
+    
 
     return (
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5 max-w-md mx-auto p-6 bg-white dark:bg-gray-800 rounded-xl shadow-sm">

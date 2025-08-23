@@ -3,11 +3,10 @@ import { signUpSchema, type SignUpValues } from "../service/validation";
 import { FormInput } from "@shared/components/form_input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Link, useNavigate } from "react-router-dom";
-import api from "@shared/api";
+import api, { getErrorMessage } from "@shared/api";
 import { useAppDispatch } from "@shared/store";
 import { loginThunk } from "../redux/thunks";
 import { toastBus } from "@shared/bus";
-import { AxiosError } from "axios";
 
 export default function SignUpForm() {
     const { 
@@ -24,14 +23,11 @@ export default function SignUpForm() {
             const response = await api.post("/users/", data)
 
             if (response.status === 201) {
-                await dispatch(loginThunk({identifier: data.username, password: data.password}))
+                await dispatch(loginThunk({identifier: data.username, password: data.password})).unwrap();
                 navigate("/home")
             }
-        } catch (error) {
-            if (error instanceof AxiosError) {
-                toastBus.emit({message: error.response?.data.detail || "Unknown error" , type: "error"})
-
-             }
+        } catch (error) {    
+            toastBus.emit({message: getErrorMessage(error) || "Unknown error" , type: "error"})
         }
     }
 

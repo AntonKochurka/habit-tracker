@@ -75,9 +75,7 @@ api.interceptors.response.use(
       originalRequest._retry = true;
       isRefreshing = true;
 
-      try {
-        console.log("HERE 1");
-        
+      try {        
         const result = await store.dispatch(refreshThunk()).unwrap();
 
         const newAccess = result.access;
@@ -91,16 +89,12 @@ api.interceptors.response.use(
         return api(originalRequest);
       } catch (refreshError) {
 
-        console.log("HERE E1");
         failedRequestsQueue.forEach(({ reject }) => reject(refreshError));
         failedRequestsQueue = [];
 
-        console.log("HERE E2");
         store.dispatch(logout());
 
-        console.log("HERE E3");
         store.dispatch(setError());
-        console.log("HERE E4");
 
         return Promise.reject(refreshError);
       } finally {
@@ -125,5 +119,22 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+export type RejectedError = {
+  message: string
+}
+
+export const getErrorMessage = (error: unknown) => {
+  if (!error) return "Unknown error";
+
+  if (error instanceof Error) return error.message;
+
+  if (axios.isAxiosError(error)) return error.response?.data?.message || error.message;
+
+  if (typeof error === "string") return error;
+
+  return "Unknown error";
+};
+
 
 export default api;

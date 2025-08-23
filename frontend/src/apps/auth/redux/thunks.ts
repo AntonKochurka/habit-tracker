@@ -12,7 +12,7 @@ export const loginThunk = createAsyncThunk(
       return response.data as TokenResponse;
     } catch (error: any) {
       return rejectWithValue(
-        error.response?.data?.message || "Authentication failed"
+        error.message || "Authentication failed"
       );
     }
   }
@@ -28,7 +28,7 @@ export const refreshThunk = createAsyncThunk(
       return response.data;
     } catch (error: any) {
       return rejectWithValue(
-        error.response?.data?.message || "Token refresh failed"
+        error.message || "Token refresh failed"
       );
     }
   }
