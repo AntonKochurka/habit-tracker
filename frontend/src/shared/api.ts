@@ -1,7 +1,7 @@
 import axios from "axios";
 import { store } from "./store";
 import { refreshThunk } from "@app/auth/redux/thunks";
-import { logout } from "@app/auth/redux";
+import { logout, setError } from "@app/auth/redux";
 
 const api = axios.create({
 	withCredentials: true,
@@ -14,8 +14,6 @@ const api = axios.create({
 api.interceptors.request.use((config) => {
   const state = store.getState();
   const token = state.auth.access;
-
-  console.log(token);
 
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
@@ -78,7 +76,10 @@ api.interceptors.response.use(
       isRefreshing = true;
 
       try {
+        console.log("HERE 1");
+        
         const result = await store.dispatch(refreshThunk()).unwrap();
+
         const newAccess = result.access;
 
         originalRequest.headers = originalRequest.headers || {};
@@ -89,9 +90,18 @@ api.interceptors.response.use(
 
         return api(originalRequest);
       } catch (refreshError) {
+
+        console.log("HERE E1");
         failedRequestsQueue.forEach(({ reject }) => reject(refreshError));
         failedRequestsQueue = [];
+
+        console.log("HERE E2");
         store.dispatch(logout());
+
+        console.log("HERE E3");
+        store.dispatch(setError());
+        console.log("HERE E4");
+
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;

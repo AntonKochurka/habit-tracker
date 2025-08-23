@@ -2,7 +2,7 @@ import { useForm } from "react-hook-form";
 import { signInSchema, type SignInValues } from "../service/validation";
 import { FormInput } from "@shared/components/form_input";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAppDispatch } from "@shared/store";
 import { loginThunk } from "../redux/thunks";
 
@@ -13,11 +13,13 @@ export default function SignInForm() {
         formState: { errors, isSubmitting } 
     } = useForm<SignInValues>({ resolver: zodResolver(signInSchema) });
     const dispatch = useAppDispatch()
+    const navigate = useNavigate()
 
     const onSubmit = async (values: SignInValues) => {
         try {
             const { confirmPassword, ...data} = values
             await dispatch(loginThunk({identifier: data.username, password: data.password}))
+            navigate("/home")
         } catch (error) {
             
         }

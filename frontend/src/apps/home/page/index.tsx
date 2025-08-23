@@ -4,6 +4,7 @@ import FolderLine from "@app/folders/components/folderLine";
 import { getFolders } from "@app/folders/redux";
 import { fetchFoldersPage } from "@app/folders/redux/thunks";
 import { useEffect } from "react";
+import NeedAuth from "@shared/decorators/needAuth";
 
 export default function HomePage() {
   const dispatch = useAppDispatch();
@@ -20,15 +21,18 @@ export default function HomePage() {
   };
 
   return (
-    <InfiniteScroll
-      dataLength={folders.length}
-      next={fetchMore}
-      hasMore={hasMore}
-      loader={<h4>Loading...</h4>}
-    >
-      {folders.map((folder) => (
-        <FolderLine key={folder.id} folder={folder} />
-      ))}
-    </InfiniteScroll>
+    <div>
+      <NeedAuth/>
+      <InfiniteScroll
+        dataLength={folders.length}
+        next={fetchMore}
+        hasMore={hasMore}
+        loader={<h4>Loading...</h4>}
+      >
+        {folders.map((folder) => (
+          <FolderLine key={folder.id} folder={folder} />
+        ))}
+      </InfiniteScroll>
+    </div>
   );
 }

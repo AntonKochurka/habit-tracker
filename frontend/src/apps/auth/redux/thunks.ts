@@ -24,6 +24,7 @@ export const refreshThunk = createAsyncThunk(
     try {
       const response = await api.post<TokenResponse>("/auth/refresh");
       
+      console.log(response);
       return response.data;
     } catch (error: any) {
       return rejectWithValue(

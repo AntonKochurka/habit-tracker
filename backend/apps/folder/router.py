@@ -8,7 +8,7 @@ from .schemas import BaseFolder
 from .crud import FolderCrud
 from .service import FolderService
 
-from apps.auth.dependencies import User, UserCrud, get_current_user
+from apps.auth.dependencies import User, UserCrud, get_current_user, get_optional_user
 
 from utils.dependencies import create_filter_dependency
 
@@ -31,6 +31,15 @@ async def create_new_folder(
 async def get_folders(
     service: FolderService = Depends(get_service),
     filters: Dict[str, Any] = Depends(create_filter_dependency(Folder)),
-    page: int = Query(1)
+    page: int = Query(1),
+    me: bool = Query(True),
+    user: User | None = Depends(get_optional_user)
 ):
+    if me:
+        if user is None:
+            raise HTTPException(status_code=401, detail="Unauthorized")
+            
+        filters["author_id"] = user.id
+
+
     return await service.folder_crud.get_folders(page, filters)

@@ -23,6 +23,10 @@ const authSlice = createSlice({
     clearError: (state) => {
       state.error = null;
     },
+    setError: (state) => {
+      state.status = LoadingStatus.FAILED
+      state.error = "Unauthorized"
+    }
   },
   extraReducers: (builder) => {
     builder
@@ -60,7 +64,7 @@ const authSlice = createSlice({
 });
 
 
-export const { logout, clearError } = authSlice.actions;
+export const { logout, clearError, setError } = authSlice.actions;
 
 export const selectAccessToken = (state: { auth: AuthState }) => state.auth.access;
 export const selectAuthStatus = (state: { auth: AuthState }) => state.auth.status;

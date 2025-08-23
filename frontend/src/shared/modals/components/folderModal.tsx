@@ -7,6 +7,8 @@ import { HexColorPicker } from "react-colorful";
 import api from "@shared/api";
 import { useAppDispatch } from "@shared/store";
 import { foldersActions } from "@app/folders/redux";
+import { AxiosError } from "axios";
+import { toastBus } from "@shared/bus";
 
 type Props = {
     id: string;
@@ -38,6 +40,9 @@ export default function FolderModal({
             }
         } catch (error) {
             console.error(error);
+            if (error instanceof AxiosError) {
+                toastBus.emit({message: error.response?.data.detail || "Unknown error", type: "error"})
+            }
         }
     }
 
