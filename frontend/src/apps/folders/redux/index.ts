@@ -1,4 +1,4 @@
-import { createEntityAdapter, createSlice, type EntityState } from "@reduxjs/toolkit";
+import { createEntityAdapter, createSlice, type EntityState, type PayloadAction } from "@reduxjs/toolkit";
 import { type Folder } from "../services/types";
 import { LoadingStatus, type BaseState, type Pagination } from "@shared/types";
 import { fetchFoldersPage } from "./thunks";
@@ -17,7 +17,7 @@ const initialState: FoldersState = foldersAdapter.getInitialState({
   error: null,
   filters: {},
   page: 1,
-  hasMore: true
+  hasMore: true,
 });
 
 const foldersSlice = createSlice({
@@ -26,6 +26,17 @@ const foldersSlice = createSlice({
     reducers: {
         addOne: foldersAdapter.addOne,
         addMany: foldersAdapter.addMany,
+        reset: () => initialState,
+        setFilters: (state, action: PayloadAction<Record<string, any>>) => {
+            state.filters = action.payload;
+            state.page = 1;
+            foldersAdapter.removeAll(state);
+        },
+        updateFilters: (state, action: PayloadAction<Record<string, any>>) => {
+            state.filters = { ...state.filters, ...action.payload };
+            state.page = 1;
+            foldersAdapter.removeAll(state);
+        }
     },
     extraReducers: (builder) => {
         builder

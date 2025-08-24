@@ -8,17 +8,18 @@ from sqlalchemy.inspection import inspect
 from sqlalchemy import select, desc, asc, func
 from sqlalchemy.sql import Select
 
-from sqlalchemy import Integer, Float, Boolean
+from sqlalchemy import Integer, Float, Boolean, DateTime
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import InstrumentedAttribute
 
+from datetime import datetime
 from config import settings
 
 _SUFFIXES = {
-    "lg": "gt",
-    "lgq": "ge",
-    "sl": "lt",
-    "slq": "le",
+    "gt": "gt",
+    "ge": "ge",
+    "lt": "lt",
+    "le": "le",
     "contains": "contains",
     "startswith": "startswith",
     "endswith": "endswith",
@@ -67,21 +68,32 @@ class Paginator:
             if field.endswith("__in"):
                 value = [v.strip() for v in value.strip().split(",")]
 
-            col_type = model_columns[self._parse_field(field)[0]].type
+            field_name, op = self._parse_field(field)
+            
+            if field_name not in model_columns:
+                continue
+                
+            col_type = model_columns[field_name].type
+            
             try: 
-                for sqltype, _type in types:
-                    if isinstance(col_type, sqltype):
-                        if isinstance(value, list):
-                            value = [_type(v) for v in value]
-                        else:
-                            value = _type(value)
+                if isinstance(col_type, DateTime) and not isinstance(value, datetime):
+                    if isinstance(value, list):
+                        value = [datetime.fromisoformat(v) for v in value]
                     else:
-                        continue
+                        value = datetime.fromisoformat(value)
+                else:
+                    for sqltype, _type in types:
+                        if isinstance(col_type, sqltype):
+                            if isinstance(value, list):
+                                value = [_type(v) for v in value]
+                            else:
+                                value = _type(value)
+                            break
 
                 self.filtrate(field, value)
             except Exception as e:
                 raise HTTPException(
-                    detail=f"Cannot convert value '{value}' for field '{field_name}': {e}",
+                    detail=f"Cannot convert value '{value}' for field {field}: {e}",
                     status_code=status.HTTP_400_BAD_REQUEST
                 )
         

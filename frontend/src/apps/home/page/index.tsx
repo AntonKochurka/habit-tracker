@@ -5,28 +5,30 @@ import { getFolders } from "@app/folders/redux";
 import { fetchFoldersPage } from "@app/folders/redux/thunks";
 import { useEffect } from "react";
 import NeedAuth from "@shared/decorators/needAuth";
+import CalendarLine from "@app/habits/components/calendarLine";
 
 export default function HomePage() {
   const dispatch = useAppDispatch();
+  const fState = useAppSelector((state) => state.folders);
   const folders = Object.values(useAppSelector(getFolders));
-  const hasMore = useAppSelector((state) => state.folders.hasMore);
-  const page = useAppSelector((state) => state.folders.page);
+
 
   useEffect(() => {
     dispatch(fetchFoldersPage(1))
-  }, [dispatch])
+  }, [dispatch, fState.filters])
   
   const fetchMore = () => {
-    if (hasMore) dispatch(fetchFoldersPage(page + 1));
+    if (fState.hasMore) dispatch(fetchFoldersPage(fState.page + 1));
   };
 
   return (
     <div>
       <NeedAuth/>
+      <CalendarLine />
       <InfiniteScroll
         dataLength={folders.length}
         next={fetchMore}
-        hasMore={hasMore}
+        hasMore={fState.hasMore}
         loader={<h4>Loading...</h4>}
       >
         {folders.map((folder) => (
