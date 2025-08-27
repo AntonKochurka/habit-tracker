@@ -32,14 +32,8 @@ async def get_folders(
     service: FolderService = Depends(get_service),
     filters: Dict[str, Any] = Depends(create_filter_dependency(Folder)),
     page: int = Query(1),
-    me: bool = Query(True),
-    user: User | None = Depends(get_optional_user)
+    user: User | None = Depends(get_current_user)
 ):
-    if me:
-        if user is None:
-            raise HTTPException(status_code=401, detail="Unauthorized")
-            
-        filters["author_id"] = user.id
-
-
+    filters["author_id"] = user.id
+    
     return await service.folder_crud.get_folders(page, filters)

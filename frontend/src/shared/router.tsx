@@ -19,8 +19,8 @@ export let router = createBrowserRouter([
             },
             {
                 path: "home",
-                element: <HomePage/>,
                 children: [
+                    {index: true, element: <HomePage />},
                     {path: "folder/:id", element: <SingleFolderPage />},
                     // {path: "habit/:id", element: <SingleHabitPage />}
                 ]

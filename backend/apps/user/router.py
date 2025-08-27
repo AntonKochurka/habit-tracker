@@ -22,7 +22,7 @@ async def get_users_list(
 ):
     return await service.user_crud.get_users(page, filters)
 
-@router.post("/")
+@router.post("/", status_code=201)
 async def create_user(
     data: UserCreateRequest,
     service: UserService = Depends(get_service)

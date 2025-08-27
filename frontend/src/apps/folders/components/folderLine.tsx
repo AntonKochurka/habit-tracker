@@ -1,5 +1,7 @@
 import { useState } from "react";
 import type { Folder } from "../services/types";
+import { FaDoorClosed, FaPlusSquare } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 
 interface Props {
   folder: Folder;
@@ -8,6 +10,7 @@ interface Props {
 
 export default function FolderLine({ folder, isOpen = false }: Props) {
   const [open, setOpen] = useState(isOpen);
+  const navigate = useNavigate();
 
   if (!folder) return null;
 
@@ -28,6 +31,12 @@ export default function FolderLine({ folder, isOpen = false }: Props) {
         </div>
         <div className="flex-grow ml-2">
           <hr className="m-0" style={{ borderTop: `1px solid ${folder.color}` }} />
+        </div>
+        <div className="ml-2">
+          <FaPlusSquare color={folder.color} />
+        </div>
+        <div className="ml-2">
+          <FaDoorClosed color={folder.color} onClick={() => {navigate(`/home/folder/${folder.id}`)}} />
         </div>
       </div>
 
