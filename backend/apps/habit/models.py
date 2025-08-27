@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Boolean, Integer, Enum, ForeignKey, DateTime, func
+from sqlalchemy import Column, Text, String, Boolean, Integer, Enum, ForeignKey, DateTime, func
 from sqlalchemy.orm import relationship
 from enum import Enum as PyEnum
 from db import Base, BaseMixin
@@ -23,7 +23,7 @@ class Habit(Base, BaseMixin):
     __tablename__ = "habits"
 
     title = Column(String(50), unique=True, index=True, nullable=False)
-    
+    description = Column(Text, nullable=True)
     author_id = Column(Integer, ForeignKey('users.id'), nullable=False)
     author = relationship("User", back_populates="habits")
 

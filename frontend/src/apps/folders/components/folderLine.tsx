@@ -2,6 +2,8 @@ import { useState } from "react";
 import type { Folder } from "../services/types";
 import { FaDoorClosed, FaPlusSquare } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import { showModal } from "@shared/modals/service/service";
+import { ModalKeys } from "@shared/modals/service/types";
 
 interface Props {
   folder: Folder;
@@ -33,7 +35,17 @@ export default function FolderLine({ folder, isOpen = false }: Props) {
           <hr className="m-0" style={{ borderTop: `1px solid ${folder.color}` }} />
         </div>
         <div className="ml-2">
-          <FaPlusSquare color={folder.color} />
+          <FaPlusSquare color={folder.color} onClick={() => {
+            showModal(
+              ModalKeys.CREATE_HABIT, {
+                title: "Create Habit",
+                folder: {
+                  id: folder.id,
+                  title: folder.title
+                }
+              }
+            )
+          }} />
         </div>
         <div className="ml-2">
           <FaDoorClosed color={folder.color} onClick={() => {navigate(`/home/folder/${folder.id}`)}} />
