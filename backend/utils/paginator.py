@@ -12,7 +12,7 @@ from sqlalchemy import Integer, Float, Boolean, DateTime
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import InstrumentedAttribute
 
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 from config import settings
 
 _SUFFIXES = {
@@ -26,6 +26,46 @@ _SUFFIXES = {
     "in": "in",
     # exact is default (no suffix)
 }
+
+def _is_date_only(s: str) -> bool:
+    return isinstance(s, str) and len(s) == 10 and s[4] == "-" and s[7] == "-"
+
+def _parse_iso_to_utc(value: str | datetime) -> datetime:
+    if isinstance(value, datetime):
+        return value.astimezone(timezone.utc) if value.tzinfo else value.replace(tzinfo=timezone.utc)
+    if isinstance(value, str):
+        s = value.strip()
+        if s.endswith("Z"):
+            s = s[:-1] + "+00:00"
+        dt = datetime.fromisoformat(s)
+        return dt.astimezone(timezone.utc) if dt.tzinfo else dt.replace(tzinfo=timezone.utc)
+    raise ValueError(f"Unsupported datetime value: {value!r}")
+
+def _day_range_utc(date_str: str) -> tuple[datetime, datetime]:
+    start = datetime.fromisoformat(date_str).replace(tzinfo=timezone.utc)
+    end = start + timedelta(days=1)
+    return start, end
+
+def _get_col_type(col: InstrumentedAttribute):
+    try:
+        return col.property.columns[0].type
+    except Exception:
+        try:
+            return getattr(col, "type", None)
+        except Exception:
+            return None
+
+def _is_datetime_col(col: InstrumentedAttribute) -> bool:
+    ct = _get_col_type(col)
+    if ct is None:
+        return False
+    try:
+        return isinstance(ct, DateTime) or "timestamp" in ct.__class__.__name__.lower()
+    except Exception:
+        try:
+            return "timestamp" in str(ct).lower() or "timestamptz" in str(ct).lower()
+        except Exception:
+            return False
 
 class Paginator:
     def __init__(
@@ -66,7 +106,7 @@ class Paginator:
 
         for field, value in filters.items():
             if field.endswith("__in"):
-                value = [v.strip() for v in value.strip().split(",")]
+                value = [v.strip() for v in str(value).strip().split(",") if v.strip()]
 
             field_name, op = self._parse_field(field)
             
@@ -76,11 +116,14 @@ class Paginator:
             col_type = model_columns[field_name].type
             
             try: 
-                if isinstance(col_type, DateTime) and not isinstance(value, datetime):
+                if isinstance(col_type, DateTime):
                     if isinstance(value, list):
-                        value = [datetime.fromisoformat(v) for v in value]
+                        value = [_parse_iso_to_utc(v) for v in value]
                     else:
-                        value = datetime.fromisoformat(value)
+                        if isinstance(value, str) and _is_date_only(value):
+                            value = value
+                        else:
+                            value = _parse_iso_to_utc(value)
                 else:
                     for sqltype, _type in types:
                         if isinstance(col_type, sqltype):
@@ -218,15 +261,24 @@ class Paginator:
         return field, "exact"
 
     def _build_expr(self, col: InstrumentedAttribute, op: str, value: Any):
+        if _is_datetime_col(col):
+            if op == "exact" and isinstance(value, str) and _is_date_only(value):
+                start, end = _day_range_utc(value)
+                return (col >= start) & (col < end)
+            if isinstance(value, str):
+                value = _parse_iso_to_utc(value)
+            elif isinstance(value, list):
+                value = [_parse_iso_to_utc(v) for v in value]
+
         if op == "exact":
             return col == value
-        if op == "lg":
+        if op == "gt":
             return col > value
-        if op == "lgq":
+        if op == "ge":
             return col >= value
-        if op == "sl":
+        if op == "lt":
             return col < value
-        if op == "slq":
+        if op == "le":
             return col <= value
         if op == "contains":
             return col.contains(value)
