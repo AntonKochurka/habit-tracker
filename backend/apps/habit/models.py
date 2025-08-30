@@ -47,10 +47,6 @@ class HabitRecord(Base, BaseMixin):
     habit_id = Column(Integer, ForeignKey('habits.id'), nullable=False)
     
     current_value = Column(Integer, nullable=True, default=0)  
-    completed_at = Column(DateTime(timezone=True), server_default=func.now())
-    value_achieved = Column(Integer, nullable=True)  # TODO: percentage of success
-        # for example target_value = 60(seconds or tries)
-        # I've done 30, means current_value = 30
-        # value_achieved = 50 (%) because i've done a half of required task
+    completed_at = Column(DateTime(timezone=True), default=None, nullable=True)
 
     habit = relationship("Habit", back_populates="records")
