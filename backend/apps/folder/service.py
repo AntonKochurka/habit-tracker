@@ -45,3 +45,6 @@ class FolderService:
             )
         
         return await self.folder_crud.create_folder(data)
+    
+    async def create_folder_habit_relationships(self):
+        return await self.folder_crud.create_folder_habit_relationships()

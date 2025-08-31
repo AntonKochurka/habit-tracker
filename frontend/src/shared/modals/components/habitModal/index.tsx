@@ -9,6 +9,7 @@ import { useAppSelector } from "@shared/store";
 import { folderSelector } from "@app/folders/redux";
 import type { Folder } from "@app/folders/services/types";
 import FolderCombobox from "./foldersCombobox";
+import api from "@shared/api";
 
 type Props = {
     id: string;
@@ -57,10 +58,8 @@ export default function HabitModal({
 
     const onSubmit = async (values: HabitCreateValues) => {
         try {
-            const submitData = {
-                ...values
-            };
-            console.log(submitData);
+            const response = await api.post("/habits/", values)
+            
         } catch (error) {
             console.error(error);
         }
