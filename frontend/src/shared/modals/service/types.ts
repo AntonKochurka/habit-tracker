@@ -15,3 +15,4 @@ export type ModalEntry = {
 export interface ModalState {
   stack: ModalEntry[]; 
 }
+

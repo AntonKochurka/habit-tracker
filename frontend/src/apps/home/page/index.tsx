@@ -1,7 +1,7 @@
 import InfiniteScroll from "react-infinite-scroll-component";
 import { useAppSelector, useAppDispatch } from "@shared/store";
 import FolderLine from "@app/folders/components/folderLine";
-import { getFolders } from "@app/folders/redux";
+import { folderSelector} from "@app/folders/redux";
 import { fetchFoldersPage } from "@app/folders/redux/thunks";
 import { useEffect } from "react";
 import NeedAuth from "@shared/decorators/needAuth";
@@ -10,7 +10,7 @@ import CalendarLine from "@app/habits/components/calendarLine";
 export default function HomePage() {
   const dispatch = useAppDispatch();
   const fState = useAppSelector((state) => state.folders);
-  const folders = Object.values(useAppSelector(getFolders));
+  const folders = useAppSelector(folderSelector.selectAll);
 
 
   useEffect(() => {

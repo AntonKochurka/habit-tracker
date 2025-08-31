@@ -64,5 +64,5 @@ const foldersSlice = createSlice({
 export const foldersReducer = foldersSlice.reducer;
 export const foldersActions = foldersSlice.actions;
 
-export const getFolders = (state: { folders: FoldersState}) => state.folders.entities;
+export const folderSelector = foldersAdapter.getSelectors((state: { folders: FoldersState}) => state.folders)
 export const getFoldersState = (state: { folders: FoldersState}) => state.folders;

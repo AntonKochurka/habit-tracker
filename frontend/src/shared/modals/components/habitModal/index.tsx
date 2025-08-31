@@ -5,15 +5,16 @@ import { habitCreateSchema, type HabitCreateValues } from "../../service/validat
 import { useState } from "react";
 import { toastBus } from "@shared/bus";
 import HabitTypeComponent from "./habitTypeComponent";
+import { useAppSelector } from "@shared/store";
+import { folderSelector } from "@app/folders/redux";
+import type { Folder } from "@app/folders/services/types";
+import FolderCombobox from "./foldersCombobox";
 
 type Props = {
     id: string;
     title?: string;
     onCancel: () => void;
-    folder: {
-        id: number;
-        title: string;
-    }
+    folder: Folder
 }
 
 const daysOfWeek = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -21,7 +22,9 @@ const daysOfWeek = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 export default function HabitModal({
     title, onCancel, folder
 }: Props) {
+    const folders = useAppSelector(folderSelector.selectAll);
     const [habitType, setHabitType] = useState<'default' | 'timer' | 'counter'>('default');
+    const [selectedFolders, setSelectedFolders] = useState<Folder[]>([folder]);
     
     const {
         register,
@@ -32,22 +35,21 @@ export default function HabitModal({
     } = useForm<HabitCreateValues>({ 
         resolver: zodResolver(habitCreateSchema),
         defaultValues: {
-            folder_id: folder.id,
+            folder_ids: [folder.id],
             habit_type: 'default',
-            active_days: "1,2,3,4,5,6,7"
+            active_days: [1,2,3,4,5,6,7]
         }
     });
-
-    const activeDays = watch('active_days') || "";
-    const activeDaysArray = activeDays.split(',').map(Number);
+    
+    const activeDays = watch('active_days') || [];
 
     const toggleDay = (day: number) => {
-        const newActiveDays = activeDaysArray.includes(day)
-            ? activeDaysArray.filter(d => d !== day)
-            : [...activeDaysArray, day];
+        const newActiveDays = activeDays.includes(day)
+            ? activeDays.filter(d => d !== day)
+            : [...activeDays, day];
 
         if (newActiveDays.length > 0) {
-            setValue('active_days', newActiveDays.sort().join(','));
+            setValue('active_days', newActiveDays.sort());
         } else {
             toastBus.emit({message: "Your habit must have AT LEAST one active day", type: "warning"})
         }
@@ -55,11 +57,15 @@ export default function HabitModal({
 
     const onSubmit = async (values: HabitCreateValues) => {
         try {
-            console.log(values);
+            const submitData = {
+                ...values
+            };
+            console.log(submitData);
         } catch (error) {
             console.error(error);
         }
     }
+
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
@@ -95,21 +101,14 @@ export default function HabitModal({
                             )}
                         </div>
 
-                        <div className="mb-4">
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                Folder
-                            </label>
-                            <input
-                                type="hidden"
-                                {...register("folder_id")}
-                            />
-                            <div className="px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg text-gray-700 dark:text-gray-300">
-                                [ {folder.id} ]: {folder.title}
-                            </div>
-                            {errors.folder_id && (
-                                <p className="mt-1 text-sm text-red-600">{errors.folder_id.message}</p>
-                            )}
-                        </div>
+                        <FolderCombobox
+                            folders={folders}
+                            selectedFolders={selectedFolders}
+                            setSelectedFolders={setSelectedFolders}
+                            setValue={setValue}
+                            error={errors.folder_ids}
+                            register={register}
+                        />
 
                         <div className="mb-4">
                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -167,7 +166,7 @@ export default function HabitModal({
                             <div className="flex flex-nowrap gap-2 overflow-x-auto pb-2">
                                 {daysOfWeek.map((day, index) => {
                                     const dayNumber = index + 1;
-                                    const isActive = activeDaysArray.includes(dayNumber);
+                                    const isActive = activeDays.includes(dayNumber);
                                     
                                     return (
                                         <button

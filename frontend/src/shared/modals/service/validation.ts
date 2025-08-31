@@ -20,11 +20,11 @@ export type ChangePasswordValues = z.infer<typeof changePasswordSchema>;
 
 export const habitCreateSchema = z.object({
   title: z.string().min(3, "Title is required"),
-  folder_id: z.number().min(1, "Folder is required"),
+  folder_ids: z.array(z.number()).min(1, "At least one folder is required"),
   description: z.string().optional(),
   habit_type: z.enum(['default', 'timer', 'counter']),
   target_value: z.number().optional(),
-  active_days: z.string().optional(),
+  active_days: z.array(z.number()).min(1, "At least one day is required"),
 }).refine((data) => {
   if (data.habit_type !== 'default' && !data.target_value) {
     return false;

@@ -30,7 +30,7 @@ class HabitUpdateRequest(BaseModel):
 
 class HabitRead(HabitBase):
     id: int
-    record: Optional[HabitRecordBase] = None
+    record: Optional[HabitType] = None
 
     class Config:
         from_attributes = True
