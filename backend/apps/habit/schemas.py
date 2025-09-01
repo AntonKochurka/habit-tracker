@@ -8,7 +8,17 @@ HabitType = Literal["default", "timer", "counter"]
 class HabitRecordBase(BaseModel):
     current_value: int
     completed_at: Optional[datetime] = None
-    
+
+class HabitRecordRead(HabitRecordBase):
+    id: int
+
+    created_at: datetime
+    updated_at: Optional[datetime] = None
+
+    class Config:
+        from_attributes = True
+
+
 class HabitBase(BaseModel):
     title: str
     description: Optional[str] = None
@@ -17,12 +27,9 @@ class HabitBase(BaseModel):
     target_value: Optional[int] = None
     active_days: List[int] = []
 
-
 class HabitCreateRequest(HabitBase):
     folder_ids: List[int] = []
     
-
-
 class HabitUpdateRequest(BaseModel):
     title: Optional[str] = None
     description: Optional[str] = None
@@ -32,7 +39,20 @@ class HabitUpdateRequest(BaseModel):
 
 class HabitRead(HabitBase):
     id: int
-    record: Optional[HabitType] = None
+
+    created_at: datetime
+    updated_at: Optional[datetime] = None
+
+    class Config:
+        from_attributes = True
+
+class RepresentativeHabit(HabitRead):
+    id: int
+
+    record: Optional[HabitRecordBase] = None
+
+    created_at: datetime
+    updated_at: Optional[datetime] = None
 
     class Config:
         from_attributes = True

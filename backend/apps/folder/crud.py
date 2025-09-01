@@ -1,8 +1,8 @@
 from fastapi import HTTPException, status
 
 from db import AsyncSession
-from sqlalchemy import insert
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy import insert, select
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 
 from .models import Folder, folder_habit_relationships
 from .schemas import BaseFolder, FolderRead
