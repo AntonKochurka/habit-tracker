@@ -193,7 +193,9 @@ class Paginator:
         self,
         page: int = 1,
         per_page: None | int = None,
-        session: Optional[AsyncSession] = None
+        session: Optional[AsyncSession] = None,
+        ItemModel: Optional[BaseModel] = None, 
+        is_dictable: bool = False,
     ) -> Dict[str, Any]:
         """
         Executes query with LIMIT/OFFSET and returns:
@@ -201,7 +203,8 @@ class Paginator:
         """
         if per_page is None:
             per_page = settings.PER_PAGE
-         
+
+        ItemModel = ItemModel or self.ItemModel
         sess = session or self._session
         if sess is None:
             raise RuntimeError("No AsyncSession provided to Paginator (pass to constructor or to paginate()).")
@@ -222,8 +225,11 @@ class Paginator:
         result = await sess.execute(q)
         items = result.scalars().all()
 
-        if self.ItemModel is not None:
-            items = [self.ItemModel(**item.to_dict()) for item in items]
+        if ItemModel is not None:
+            items = [ItemModel(**item.to_dict()) for item in items]
+        else:
+            if is_dictable:
+                items = [item.to_dict() for item in items]
 
         return {
             "items": items,
@@ -233,16 +239,33 @@ class Paginator:
             "pages": pages,
         }
 
-    async def first(self, session: Optional[AsyncSession] = None):
+    async def first(
+        self, 
+        session: Optional[AsyncSession] = None,
+        *,
+        ItemModel: Optional[BaseModel] = None,
+        is_dictable: bool = False
+    ):
         """Returns just one single record with filters"""
         sess = session or self._session
+        ItemModel = ItemModel or self.ItemModel
+
         if sess is None:
             raise RuntimeError(...)
+        
         q = self._make_query().limit(1)
         result = await sess.execute(q)
         item = result.scalars().first()
-        if self.ItemModel is not None and item is not None:
-            item = self.ItemModel(item)                    
+        
+        if item is None:
+            return None
+
+        if ItemModel is not None:
+            item = self.ItemModel(**item.to_dict())                    
+        else:
+            if  is_dictable:
+                item = item.to_dict()
+
         return item
 
     def _parse_field(self, field: str) -> Tuple[str, str]:

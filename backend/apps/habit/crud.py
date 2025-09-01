@@ -1,10 +1,12 @@
 from fastapi import HTTPException, status
+from datetime import datetime
 
 from db import AsyncSession
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy import select, and_, func
 
-from .models import Habit, HabitType
-from .schemas import HabitBase, HabitRead, HabitCreateRequest
+from .models import Habit, HabitType, HabitRecord
+from .schemas import HabitBase, HabitRead, HabitCreateRequest, RepresentativeHabit, HabitRecordRead
 
 from utils.paginator import Paginator
 
@@ -37,13 +39,35 @@ class HabitCrud:
                 status_code=status.HTTP_409_CONFLICT
             )
 
-    async def get_habits(self, page, filters):
+    async def get_habits(self, page, filters, is_representative, current_day: str):
         """
         Get habit list with pagination utils.
         """
-        
-        pgh = Paginator(
-            Habit, item_model=HabitRead, session=self.db
+        current_day = datetime.fromisoformat(current_day).date()
+
+        pg = Paginator(Habit, session=self.db)
+        pg.filtrate_by_dict(filters)
+
+        if not is_representative:
+            return await pg.paginate(page=page, ItemModel=HabitRead)
+
+        habits = await pg.paginate(page=page, ItemModel=RepresentativeHabit)
+        habit_ids = [habit.id for habit in habits["items"]]
+
+        records_result = await self.db.execute(
+            select(HabitRecord)
+            .where(
+                and_(
+                    HabitRecord.habit_id.in_(habit_ids),
+                    func.date(HabitRecord.completed_at) == current_day
+                )
+            )
         )
-        
-        return await pg.paginate(page=page)
+        records = records_result.scalars().all()
+        records_by_habit = {rec.habit_id: rec for rec in records}
+
+        for habit in habits["items"]:
+            rec = records_by_habit.get(habit.id)
+            habit.record = rec and HabitRecordRead.model_validate(rec)
+            
+        return habits
