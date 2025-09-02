@@ -1,4 +1,4 @@
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 from fastapi import APIRouter, Depends, Query
 from datetime import datetime
 
@@ -33,8 +33,10 @@ async def get_habits_list(
     current_day: str = Query(datetime.utcnow()),
     is_representative: bool = Query(False),
     service: HabitService = Depends(get_service),
+    user: User = Depends(get_current_user),
+    folder_id: Optional[int] = Query(None)
 ):
-    return await service.habit_crud.get_habits(page, filters, is_representative, current_day)
+    return await service.habit_crud.get_habits(page, filters, user, is_representative, current_day, folder_id)
 
 
 @router.post("/", status_code=201)

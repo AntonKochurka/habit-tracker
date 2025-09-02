@@ -8,7 +8,7 @@ from sqlalchemy.inspection import inspect
 from sqlalchemy import select, desc, asc, func
 from sqlalchemy.sql import Select
 
-from sqlalchemy import Integer, Float, Boolean, DateTime
+from sqlalchemy import Integer, Float, Boolean, DateTime, Select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import InstrumentedAttribute
 
@@ -93,6 +93,11 @@ class Paginator:
         self._where = []
         self._order_by: List[Any] = []
         self._base_query: Optional[Select] = None
+
+    def with_base_query(self, stmt: Select):
+        """Changes base query"""
+        self._base_query = stmt
+        return self
 
     def filtrate_by_dict(self, filters: Dict):
         """filtrating by {'field':'value'} dict"""

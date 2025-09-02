@@ -8,6 +8,7 @@ from sqlalchemy import select, and_, func
 from .models import Habit, HabitType, HabitRecord
 from .schemas import HabitBase, HabitRead, HabitCreateRequest, RepresentativeHabit, HabitRecordRead
 
+from apps.folder.models import folder_habit_relationships
 from utils.paginator import Paginator
 
 class HabitCrud:
@@ -39,13 +40,29 @@ class HabitCrud:
                 status_code=status.HTTP_409_CONFLICT
             )
 
-    async def get_habits(self, page, filters, is_representative, current_day: str):
+    async def get_habits(
+        self, 
+        page, 
+        filters, 
+        user, 
+        is_representative,
+        current_day: str,
+        folder_id: int | None = None
+    ):
         """
         Get habit list with pagination utils.
         """
         current_day = datetime.fromisoformat(current_day).date()
+        filters["author_id"] = user.id
 
         pg = Paginator(Habit, session=self.db)
+
+        if folder_id:
+            stmt = select(Habit).join(folder_habit_relationships).where(
+                folder_habit_relationships.c.folder_id == folder_id
+            )
+            pg.with_base_query(stmt)
+            
         pg.filtrate_by_dict(filters)
 
         if not is_representative:
