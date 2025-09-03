@@ -4,6 +4,7 @@ import { FaDoorClosed, FaPlusSquare } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { showModal } from "@shared/modals/service/service";
 import { ModalKeys } from "@shared/modals/service/types";
+import DisplayHabitsForFolderLine from "./displayHabitsForFolderLine";
 
 interface Props {
   folder: Folder;
@@ -11,12 +12,16 @@ interface Props {
 }
 
 export default function FolderLine({ folder, isOpen = false }: Props) {
-  const [open, setOpen] = useState(isOpen);
   const navigate = useNavigate();
+
+  const [open, setOpen] = useState(isOpen);
 
   if (!folder) return null;
 
-  const toggleOpen = () => setOpen((prev) => !prev);
+  const toggleOpen = () => {
+    setOpen((prev) => !prev);
+    
+  }
 
   return (
     <div className="flex flex-col w-full">
@@ -54,7 +59,7 @@ export default function FolderLine({ folder, isOpen = false }: Props) {
 
       {open && (
         <div className="pl-6 pt-2">
-          <div className="text-gray-500 italic">Folder content goes here</div>
+          <DisplayHabitsForFolderLine folder={folder}/>
         </div>
       )}
     </div>

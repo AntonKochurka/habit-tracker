@@ -87,4 +87,5 @@ class HabitCrud:
             rec = records_by_habit.get(habit.id)
             habit.record = rec and HabitRecordRead.model_validate(rec)
             
+        habits["ids"] = habit_ids
         return habits

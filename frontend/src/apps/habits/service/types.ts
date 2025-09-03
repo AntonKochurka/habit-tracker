@@ -5,6 +5,7 @@ export interface Habit {
   title: string;
   habit_type: HabitType;
   target_value: number | null;
+  description: string | null;
   record: {
     type: HabitType;
     is_completed: boolean;

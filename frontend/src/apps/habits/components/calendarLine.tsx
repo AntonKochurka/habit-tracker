@@ -2,6 +2,7 @@ import { foldersActions } from "@app/folders/redux";
 import { useAppDispatch } from "@shared/store";
 import { useState, useRef, useEffect } from "react";
 import { FaChevronLeft, FaChevronRight, FaCalendarAlt } from "react-icons/fa";
+import { habitsActions } from "../redux";
 
 export default function CalendarLine() {
   const dispatch = useAppDispatch();
@@ -14,6 +15,7 @@ export default function CalendarLine() {
   useEffect(() => {
     dispatch(foldersActions.reset())
     dispatch(foldersActions.setFilters({created_at__le: currentDate.toISOString()}))
+    dispatch(habitsActions.setCurrentDay(currentDate))
   }, [currentDate, dispatch])
   
   const generateDays = (date: Date) => {

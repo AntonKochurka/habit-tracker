@@ -34,4 +34,5 @@ export interface PaginationResponse<T> {
   page: number;
   pages: number;
   per_page: number;
+  ids: number[] | null;
 }

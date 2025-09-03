@@ -36,7 +36,17 @@ const foldersSlice = createSlice({
             state.filters = { ...state.filters, ...action.payload };
             state.page = 1;
             foldersAdapter.removeAll(state);
+        },
+        addIdsToFolder: (state, action: PayloadAction<{ folderId: number; ext: number[] }>) => {
+            const folder = state.entities[action.payload.folderId];
+            if (folder) {
+                if (!folder.habit_ids) {
+                folder.habit_ids = [];
+                }
+                folder.habit_ids.push(...action.payload.ext);
+            }
         }
+
     },
     extraReducers: (builder) => {
         builder

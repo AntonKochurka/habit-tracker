@@ -1,6 +1,7 @@
-import { createEntityAdapter, createSlice, type EntityState } from "@reduxjs/toolkit";
+import { createEntityAdapter, createSelector, createSlice, type EntityState, type PayloadAction } from "@reduxjs/toolkit";
 import { LoadingStatus, type BaseState, type Pagination } from "@shared/types";
 import type { Habit } from "../service/types";
+import { getFoldersState } from "@app/folders/redux";
 
 export const HABITS_REDUX_KEY = "habits";
 
@@ -9,7 +10,14 @@ const habitsAdapter = createEntityAdapter<Habit, number>({
   sortComparer: (a, b) => a.title.localeCompare(b.title),
 });
 
-export interface HabitsState extends EntityState<Habit, number>, BaseState, Pagination {}
+export interface HabitsState extends EntityState<Habit, number>, BaseState, Pagination {
+  current_day: string;
+}
+
+function normalizeDateISO(date: string | Date): string {
+  const d = new Date(date);
+  return d.toISOString().split("T")[0];
+}
 
 const initialState: HabitsState = habitsAdapter.getInitialState({
   status: LoadingStatus.IDLE,
@@ -17,6 +25,7 @@ const initialState: HabitsState = habitsAdapter.getInitialState({
   filters: {},
   page: 1,
   hasMore: true,
+  current_day: normalizeDateISO(new Date())
 });
 
 const habitsSlice = createSlice({
@@ -32,6 +41,9 @@ const habitsSlice = createSlice({
     setAll: habitsAdapter.setAll,
     setMany: habitsAdapter.setMany,
     setOne: habitsAdapter.setOne,
+    setCurrentDay: (state, action: PayloadAction<string | Date>) => {
+      state.current_day = normalizeDateISO(action.payload);
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -41,5 +53,16 @@ const habitsSlice = createSlice({
 export const habitsReducer = habitsSlice.reducer;
 export const habitsActions = habitsSlice.actions;
 
-export const getHabits = (state: { habits: HabitsState }) => state.habits.entities;
 export const getHabitsState = (state: { habits: HabitsState }) => state.habits;
+
+export const selectHabitsByFolderId = (folderId: number) =>
+  createSelector(
+    [getHabitsState, getFoldersState],
+    (habitsState, foldersState) => {
+      const folder = foldersState.entities[folderId];
+      if (!folder || !folder.habit_ids) return [];
+      return folder.habit_ids
+        .map((id: number) => habitsState.entities[id])
+        .filter((habit): habit is NonNullable<typeof habit> => !!habit);
+    }
+  );
