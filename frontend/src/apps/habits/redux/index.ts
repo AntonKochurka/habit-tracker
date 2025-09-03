@@ -12,6 +12,7 @@ const habitsAdapter = createEntityAdapter<Habit, number>({
 
 export interface HabitsState extends EntityState<Habit, number>, BaseState, Pagination {
   current_day: string;
+  pagination: Record<number, { page: number; hasMore: boolean }>;
 }
 
 function normalizeDateISO(date: string | Date): string {
@@ -25,7 +26,8 @@ const initialState: HabitsState = habitsAdapter.getInitialState({
   filters: {},
   page: 1,
   hasMore: true,
-  current_day: normalizeDateISO(new Date())
+  current_day: normalizeDateISO(new Date()),
+  pagination: {}
 });
 
 const habitsSlice = createSlice({
@@ -43,6 +45,18 @@ const habitsSlice = createSlice({
     setOne: habitsAdapter.setOne,
     setCurrentDay: (state, action: PayloadAction<string | Date>) => {
       state.current_day = normalizeDateISO(action.payload);
+    },
+    setPagination: (
+      state,
+      action: PayloadAction<{ folderId: number; page: number; hasMore: boolean }>
+    ) => {
+      state.pagination[action.payload.folderId] = {
+        page: action.payload.page,
+        hasMore: action.payload.hasMore,
+      };
+    },
+    resetPagination: (state, action: PayloadAction<{ folderId: number }>) => {
+      state.pagination[action.payload.folderId] = { page: 1, hasMore: true };
     },
   },
   extraReducers: (builder) => {
@@ -66,3 +80,7 @@ export const selectHabitsByFolderId = (folderId: number) =>
         .filter((habit): habit is NonNullable<typeof habit> => !!habit);
     }
   );
+
+export const selectPaginationByFolderId = (folderId: number) => 
+  (state: { habits: HabitsState }) => 
+    state.habits.pagination[folderId] ?? { page: 1, hasMore: true };

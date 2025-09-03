@@ -87,10 +87,21 @@ export default function DisplayHabitsForFolderLine({ folder }: Props) {
 
         setPage((prev) => prev + 1);
         setHasMore(hasMore);
+
+        dispatch(
+            habitsActions.setPagination({
+                folderId: folder.id,
+                page: page + 1,
+                hasMore,
+            })
+        )
     };
 
     useEffect(() => {
-        loadMore();
+        if (habits.length === 0) {
+            dispatch(habitsActions.resetPagination({ folderId: folder.id }));
+            loadMore();
+        }
     }, []);
 
     return (
