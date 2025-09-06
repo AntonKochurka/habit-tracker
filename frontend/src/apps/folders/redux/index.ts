@@ -7,7 +7,6 @@ export const FOLDERS_REDUX_KEY = "folders"
 
 const foldersAdapter = createEntityAdapter<Folder, number>({
     selectId: (folder: Folder) => folder.id,
-    sortComparer: (x, y) => x.title.localeCompare(y.title)
 });
 
 export interface FoldersState extends EntityState<Folder, number>, BaseState, Pagination {}
@@ -58,10 +57,12 @@ const foldersSlice = createSlice({
                 foldersAdapter.addMany(state, action.payload.items);
                 state.status = LoadingStatus.SUCCEEDED
 
-                const hasMore = action.payload.page < action.payload.pages
-                state.hasMore = hasMore
-
-                if (hasMore) state.page += 1; 
+                if (action.payload.items.length === 0) {
+                    state.hasMore = false;
+                } else {
+                    state.page = (state.page ?? 0) + 1;
+                    state.hasMore = action.payload.page < action.payload.pages;
+                }
             })
             .addCase(fetchFoldersPage.rejected, (state, action) => {
                 state.error = action.payload ?? "Unknown error"

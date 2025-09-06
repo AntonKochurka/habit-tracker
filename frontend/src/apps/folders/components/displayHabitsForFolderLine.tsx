@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import type { Folder } from "../services/types";
 import type { Habit } from "@app/habits/service/types";
@@ -7,7 +7,7 @@ import { useAppDispatch, useAppSelector } from "@shared/store";
 import type { PaginationResponse } from "@shared/types";
 import { toastBus } from "@shared/bus";
 import { foldersActions } from "../redux";
-import { getHabitsState, habitsActions, selectHabitsByFolderId } from "@app/habits/redux";
+import { getHabitsState, habitsActions, selectHabitsByFolderId, selectPaginationByFolderId } from "@app/habits/redux";
 
 interface Props {
     folder: Folder;
@@ -19,62 +19,29 @@ interface HabitsFetch {
     pageSize?: number;
 }
 
-async function fetchFakeHabits({
-    folderId,
-    page,
-    pageSize = 3,
-}: HabitsFetch): Promise<{ items: Habit[]; hasMore: boolean, ids: number[] | null }> {
-    return new Promise((resolve) => {
-        setTimeout(() => {
-            const total = 100;
-            const start = (page - 1) * pageSize;
-            const end = start + pageSize;
-
-            const fakeHabits: Habit[] = Array.from({
-                length: Math.min(pageSize, total - start),
-            }).map((_, i) => ({
-                id: start + i + 1,
-                title: `Habit ${start + i + 1}`,
-                description: "Some description",
-                folderId,
-                habit_type: "default",
-                target_value: 10,
-                record: null,
-            }));
-
-            resolve({ items: fakeHabits, hasMore: end < total, ids: fakeHabits.map(h => h.id) });
-        }, 500);
-    });
-}
-
 export default function DisplayHabitsForFolderLine({ folder }: Props) {
     const dispatch = useAppDispatch();
-
     const hState = useAppSelector(getHabitsState);
     const current_day = hState.current_day;
     const habits = useAppSelector(selectHabitsByFolderId(folder.id));
+    const { page, hasMore } = useAppSelector(selectPaginationByFolderId(folder.id));
+    const [autoLoading, setAutoLoading] = useState(true);
 
-    const [page, setPage] = useState(1);
-    const [hasMore, setHasMore] = useState(true);
-
-    const fetchHabits = async ({ folderId, page }: HabitsFetch) => {
+    const fetchHabits = useCallback(async ({ folderId, page }: HabitsFetch) => {
         try {
-            const response = await api.get(`/habits?page=${page}&current_day=${current_day}&is_representative=true&folder_id=${folderId}`)
+            const response = await api.get(`/habits?page=${page}&current_day=${current_day}&is_representative=true&folder_id=${folderId}`);
             if (response.status === 200) {
                 const data: PaginationResponse<Habit> = response.data;
-
-
-                return data.items, data.page < data.pages, data.ids
+                return { items: data.items, hasMore: data.page < data.pages, ids: data.ids };
             }
         } catch (error) {
-            toastBus.emit({ message: getErrorMessage(error) || "Unknown error", type: "error" })
+            toastBus.emit({ message: getErrorMessage(error) || "Unknown error", type: "error" });
         }
-    }
+        return { items: [], hasMore: false, ids: null };
+    }, [current_day]);
 
-    const loadMore = async () => {
-        console.log(page);
-        
-        const { items, hasMore, ids } = await fetchFakeHabits({
+    const loadMore = useCallback(async () => {
+        const { items, hasMore: newHasMore, ids } = await fetchHabits({
             folderId: folder.id,
             page,
             pageSize: 6,
@@ -82,27 +49,43 @@ export default function DisplayHabitsForFolderLine({ folder }: Props) {
 
         dispatch(habitsActions.upsertMany(items));
 
-        if (ids)
-            dispatch(foldersActions.addIdsToFolder({ folderId: folder.id, ext: ids }))
-
-        setPage((prev) => prev + 1);
-        setHasMore(hasMore);
+        if (ids) {
+            dispatch(foldersActions.addIdsToFolder({ folderId: folder.id, ext: ids }));
+        }
 
         dispatch(
             habitsActions.setPagination({
                 folderId: folder.id,
                 page: page + 1,
-                hasMore,
+                hasMore: newHasMore,
             })
-        )
-    };
+        );
+    }, [fetchHabits, folder.id, page, dispatch]);
 
     useEffect(() => {
         if (habits.length === 0) {
             dispatch(habitsActions.resetPagination({ folderId: folder.id }));
-            loadMore();
         }
-    }, []);
+    }, [folder.id]);
+
+    useEffect(() => {
+        const autoLoad = async () => {
+            const container = document.getElementById(`habits-folder-${folder.id}`);
+            if (!container) return;
+            let safetyCounter = 0;
+            while (container.scrollHeight <= container.clientHeight && hasMore && safetyCounter < 10) {
+                const prevCount = habits.length;
+                await loadMore();
+                safetyCounter++;
+                if (habits.length === prevCount) break;
+            }
+            setAutoLoading(false);
+        };
+
+        if (autoLoading && hasMore) {
+            autoLoad();
+        }
+    }, [autoLoading, hasMore, loadMore, habits.length, folder.id]);
 
     return (
         <InfiniteScroll
@@ -112,8 +95,8 @@ export default function DisplayHabitsForFolderLine({ folder }: Props) {
             loader={<p className="text-center py-2">Loading...</p>}
             endMessage={<p className="text-center py-2 text-gray-500">No more habits</p>}
         >
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {habits.map((habit) => (
+            <div id={`habits-folder-${folder.id}`} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {habits.slice(1).map((habit) => (
                     <div key={habit.id} className="shadow-md rounded-2xl border">
                         <div className="p-4">
                             <h3 className="font-semibold text-lg">{habit.title}</h3>

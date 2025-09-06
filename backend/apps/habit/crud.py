@@ -53,7 +53,11 @@ class HabitCrud:
         Get habit list with pagination utils.
         """
         current_day = datetime.fromisoformat(current_day).date()
+        weekday = datetime.isoweekday(current_day)
+
         filters["author_id"] = user.id
+        # filters["active_days__in"] = weekday
+        # filters["created_at__le"] = current_day
 
         pg = Paginator(Habit, session=self.db)
 

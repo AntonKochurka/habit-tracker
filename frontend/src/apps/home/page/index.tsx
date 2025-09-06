@@ -1,9 +1,9 @@
 import InfiniteScroll from "react-infinite-scroll-component";
 import { useAppSelector, useAppDispatch } from "@shared/store";
 import FolderLine from "@app/folders/components/folderLine";
-import { folderSelector} from "@app/folders/redux";
+import { folderSelector } from "@app/folders/redux";
 import { fetchFoldersPage } from "@app/folders/redux/thunks";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import NeedAuth from "@shared/decorators/needAuth";
 import CalendarLine from "@app/habits/components/calendarLine";
 
@@ -11,30 +11,61 @@ export default function HomePage() {
   const dispatch = useAppDispatch();
   const fState = useAppSelector((state) => state.folders);
   const folders = useAppSelector(folderSelector.selectAll);
+  const [autoLoading, setAutoLoading] = useState(true);
 
+  const fetchMore = () => {
+    if (fState.hasMore) {
+      dispatch(fetchFoldersPage(fState.page + 1));
+    }
+  };
+
+  // Первый fetch, если папок нет
+  useEffect(() => {
+    if (folders.length === 0) {
+      dispatch(fetchFoldersPage(1));
+    }
+  }, [dispatch, folders.length]);
 
   useEffect(() => {
-    dispatch(fetchFoldersPage(1))
-  }, [dispatch, fState.filters])
-  
-  const fetchMore = () => {
-    if (fState.hasMore) dispatch(fetchFoldersPage(fState.page + 1));
-  };
+    const autoLoad = async () => {
+      if (!autoLoading || !fState.hasMore) return;
+      const container = document.getElementById("folders-container");
+      if (!container) return;
+
+      let safetyCounter = 0;
+      while (container.scrollHeight <= container.clientHeight && fState.hasMore && safetyCounter < 10) {
+        const prevCount = folders.length;
+        await dispatch(fetchFoldersPage(fState.page + 1));
+        safetyCounter++;
+
+        if (folders.length === prevCount) {
+          // Сервер ничего не добавил → останавливаем авто-загрузку
+          break;
+        }
+      }
+      setAutoLoading(false);
+    };
+
+    autoLoad();
+  }, [folders.length, fState.page, fState.hasMore, autoLoading, dispatch]);
 
   return (
     <div>
-      <NeedAuth/>
+      <NeedAuth />
       <CalendarLine />
-      <InfiniteScroll
-        dataLength={folders.length}
-        next={fetchMore}
-        hasMore={fState.hasMore}
-        loader={<h4>Loading...</h4>}
-      >
-        {folders.map((folder) => (
-          <FolderLine key={folder.id} folder={folder} />
-        ))}
-      </InfiniteScroll>
+      <div id="folders-container">
+        <InfiniteScroll
+          dataLength={folders.length}
+          next={fetchMore}
+          hasMore={fState.hasMore}
+          loader={<h4>Loading...</h4>}
+          style={{ overflow: 'visible' }}
+        >
+          {folders.map((folder) => (
+            <FolderLine key={folder.id} folder={folder} />
+          ))}
+        </InfiniteScroll>
+      </div>
     </div>
   );
 }
