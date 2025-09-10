@@ -50,7 +50,12 @@ export default function DisplayHabitsForFolderLine({ folder }: Props) {
         dispatch(habitsActions.upsertMany(items));
 
         if (ids) {
-            dispatch(foldersActions.addIdsToFolder({ folderId: folder.id, ext: ids }));
+            const existingIds = new Set(folder.habit_ids ?? []);
+            const uniqueIds = ids.filter(id => !existingIds.has(id));
+
+            if (uniqueIds.length > 0) {
+                dispatch(foldersActions.addIdsToFolder({ folderId: folder.id, ext: uniqueIds }));
+            }
         }
 
         dispatch(
@@ -96,7 +101,7 @@ export default function DisplayHabitsForFolderLine({ folder }: Props) {
             endMessage={<p className="text-center py-2 text-gray-500">No more habits</p>}
         >
             <div id={`habits-folder-${folder.id}`} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {habits.slice(1).map((habit) => (
+                {habits.map((habit) => (
                     <div key={habit.id} className="shadow-md rounded-2xl border">
                         <div className="p-4">
                             <h3 className="font-semibold text-lg">{habit.title}</h3>

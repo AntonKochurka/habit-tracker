@@ -9,14 +9,14 @@ const foldersAdapter = createEntityAdapter<Folder, number>({
     selectId: (folder: Folder) => folder.id,
 });
 
-export interface FoldersState extends EntityState<Folder, number>, BaseState, Pagination {}
+export interface FoldersState extends EntityState<Folder, number>, BaseState, Pagination { }
 
 const initialState: FoldersState = foldersAdapter.getInitialState({
-  status: LoadingStatus.IDLE,
-  error: null,
-  filters: {},
-  page: 1,
-  hasMore: true,
+    status: LoadingStatus.IDLE,
+    error: null,
+    filters: {},
+    page: 1,
+    hasMore: true,
 });
 
 const foldersSlice = createSlice({
@@ -36,15 +36,25 @@ const foldersSlice = createSlice({
             state.page = 1;
             foldersAdapter.removeAll(state);
         },
-        addIdsToFolder: (state, action: PayloadAction<{ folderId: number; ext: number[] }>) => {
+        addIdsToFolder: (
+            state,
+            action: PayloadAction<{ folderId: number; ext: number[] }>
+        ) => {
             const folder = state.entities[action.payload.folderId];
             if (folder) {
                 if (!folder.habit_ids) {
-                folder.habit_ids = [];
+                    folder.habit_ids = [];
                 }
-                folder.habit_ids.push(...action.payload.ext);
+                const existing = new Set(folder.habit_ids);
+                for (const id of action.payload.ext) {
+                    if (!existing.has(id)) {
+                        existing.add(id);
+                        folder.habit_ids.push(id);
+                    }
+                }
             }
         }
+
 
     },
     extraReducers: (builder) => {
@@ -75,5 +85,5 @@ const foldersSlice = createSlice({
 export const foldersReducer = foldersSlice.reducer;
 export const foldersActions = foldersSlice.actions;
 
-export const folderSelector = foldersAdapter.getSelectors((state: { folders: FoldersState}) => state.folders)
-export const getFoldersState = (state: { folders: FoldersState}) => state.folders;
+export const folderSelector = foldersAdapter.getSelectors((state: { folders: FoldersState }) => state.folders)
+export const getFoldersState = (state: { folders: FoldersState }) => state.folders;

@@ -19,7 +19,6 @@ export default function HomePage() {
     }
   };
 
-  // Первый fetch, если папок нет
   useEffect(() => {
     if (folders.length === 0) {
       dispatch(fetchFoldersPage(1));
@@ -27,39 +26,27 @@ export default function HomePage() {
   }, [dispatch, folders.length]);
 
   useEffect(() => {
-    const autoLoad = async () => {
-      if (!autoLoading || !fState.hasMore) return;
-      const container = document.getElementById("folders-container");
-      if (!container) return;
-
-      let safetyCounter = 0;
-      while (container.scrollHeight <= container.clientHeight && fState.hasMore && safetyCounter < 10) {
-        const prevCount = folders.length;
-        await dispatch(fetchFoldersPage(fState.page + 1));
-        safetyCounter++;
-
-        if (folders.length === prevCount) {
-          // Сервер ничего не добавил → останавливаем авто-загрузку
-          break;
-        }
-      }
+    if (!autoLoading || !fState.hasMore) return;
+    const container = document.getElementById("folders-container");
+    if (!container) return;
+    if (container.scrollHeight <= container.clientHeight) {
+      dispatch(fetchFoldersPage(fState.page + 1));
+    } else {
       setAutoLoading(false);
-    };
-
-    autoLoad();
+    }
   }, [folders.length, fState.page, fState.hasMore, autoLoading, dispatch]);
 
   return (
     <div>
       <NeedAuth />
       <CalendarLine />
-      <div id="folders-container">
+      <div id="folders-container" style={{ height: "80vh", overflow: "auto" }}>
         <InfiniteScroll
           dataLength={folders.length}
           next={fetchMore}
           hasMore={fState.hasMore}
           loader={<h4>Loading...</h4>}
-          style={{ overflow: 'visible' }}
+          scrollableTarget="folders-container"
         >
           {folders.map((folder) => (
             <FolderLine key={folder.id} folder={folder} />

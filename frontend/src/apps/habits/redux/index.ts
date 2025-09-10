@@ -58,6 +58,7 @@ const habitsSlice = createSlice({
     resetPagination: (state, action: PayloadAction<{ folderId: number }>) => {
       state.pagination[action.payload.folderId] = { page: 1, hasMore: true };
     },
+    reset: () => initialState
   },
   extraReducers: (builder) => {
     builder

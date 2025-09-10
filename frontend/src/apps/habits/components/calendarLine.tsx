@@ -15,6 +15,7 @@ export default function CalendarLine() {
   useEffect(() => {
     dispatch(foldersActions.reset())
     dispatch(foldersActions.setFilters({created_at__le: currentDate.toISOString()}))
+    dispatch(habitsActions.reset())
     dispatch(habitsActions.setCurrentDay(currentDate))
   }, [currentDate, dispatch])
   
