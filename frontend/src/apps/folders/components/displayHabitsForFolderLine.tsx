@@ -8,6 +8,7 @@ import type { PaginationResponse } from "@shared/types";
 import { toastBus } from "@shared/bus";
 import { foldersActions } from "../redux";
 import { getHabitsState, habitsActions, selectHabitsByFolderId, selectPaginationByFolderId } from "@app/habits/redux";
+import HabitCard from "@app/habits/components/habitCard";
 
 interface Props {
     folder: Folder;
@@ -102,12 +103,7 @@ export default function DisplayHabitsForFolderLine({ folder }: Props) {
         >
             <div id={`habits-folder-${folder.id}`} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {habits.map((habit) => (
-                    <div key={habit.id} className="shadow-md rounded-2xl border">
-                        <div className="p-4">
-                            <h3 className="font-semibold text-lg">{habit.title}</h3>
-                            <p className="text-sm text-gray-600">{habit.description}</p>
-                        </div>
-                    </div>
+                    <HabitCard habit={habit}/>
                 ))}
             </div>
         </InfiniteScroll>
