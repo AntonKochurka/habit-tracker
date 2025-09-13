@@ -31,6 +31,8 @@ let failedRequestsQueue: Array<{
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
+    console.error(error);
+    
     const originalRequest = error.config;
     const status = error.response?.status;
     const data = error.response?.data;

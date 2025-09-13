@@ -23,7 +23,7 @@ class HabitRecordRead(HabitRecordBase):
 class HabitBase(BaseModel):
     title: str
     description: Optional[str] = None
-    author_id: int
+    author_id: Optional[int] = None
     habit_type: _HabitType
     target_value: Optional[int] = None
     active_days: List[int] = []
@@ -53,7 +53,7 @@ class HabitUpdateRequest(BaseModel):
 
 class HabitRead(HabitBase):
     id: int
-
+    author_id: int
     created_at: datetime
     updated_at: Optional[datetime] = None
 

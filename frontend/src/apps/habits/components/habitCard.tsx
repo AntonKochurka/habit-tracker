@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Link } from "react-router-dom";
 import type { Habit } from "@app/habits/service/types";
 import { formatTime } from "@shared/utils";
@@ -8,8 +7,6 @@ interface HabitCardProps {
 }
 
 export default function HabitCard({ habit }: HabitCardProps) {
-    const [isHovered, setIsHovered] = useState(false);
-
     const getStatusStyle = () => {
         if (!habit.record) return "bg-gray-100 dark:bg-gray-700";
 
@@ -33,8 +30,6 @@ export default function HabitCard({ habit }: HabitCardProps) {
     return (
         <div
             className={`rounded-lg border border-gray-200 dark:border-gray-700 p-4 ${getStatusStyle()}`}
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
         >
             <div className="flex flex-col">
                 <div className="mb-3">
