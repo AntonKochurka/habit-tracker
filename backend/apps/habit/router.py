@@ -26,7 +26,7 @@ async def get_service(db: AsyncSession = Depends(get_async_session)):
 router = APIRouter(prefix="/habits")
 
 
-@router.get("")
+@router.get("") 
 async def get_habits_list(
     filters: Dict[str, Any] = Depends(create_filter_dependency(Habit)),
     page: int = Query(1, ge=1),

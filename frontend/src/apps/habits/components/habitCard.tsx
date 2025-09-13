@@ -7,29 +7,11 @@ interface HabitCardProps {
 }
 
 export default function HabitCard({ habit }: HabitCardProps) {
-    const getStatusStyle = () => {
-        if (!habit.record) return "bg-gray-100 dark:bg-gray-700";
-
-        if (habit.habit_type === "default") {
-            return habit.record.is_completed
-                ? "bg-green-100 dark:bg-green-900"
-                : "bg-orange-100 dark:bg-orange-900";
-        }
-
-        const progress = (habit.record.value_achieved || 0) / (habit.target_value || 1);
-
-        if (progress >= 1) {
-            return "bg-green-100 dark:bg-green-900";
-        } else if (progress >= 0.5) {
-            return "bg-blue-100 dark:bg-blue-900";
-        } else {
-            return "bg-purple-100 dark:bg-purple-900";
-        }
-    };
-
+    const percentage = ((habit.record?.current_value as number)/(habit.target_value as number)*100).toString().substring(0, 4)
+    
     return (
         <div
-            className={`rounded-lg border border-gray-200 dark:border-gray-700 p-4 ${getStatusStyle()}`}
+            className={`rounded-lg border border-gray-200 dark:border-gray-700 p-4 bg-gray-100 dark:bg-gray-700`}
         >
             <div className="flex flex-col">
                 <div className="mb-3">
@@ -74,16 +56,16 @@ export default function HabitCard({ habit }: HabitCardProps) {
                             ) : habit.habit_type === "counter" ? (
                                 <div className="text-center">
                                     <div className="text-lg font-semibold text-gray-900 dark:text-white">
-                                        {habit.record.value_achieved} / {habit.target_value}
+                                        {habit.record.current_value} / {habit.target_value}
                                     </div>
-                                    <div className="text-xs text-gray-500 dark:text-gray-400">progress</div>
+                                    <div className="text-xs text-gray-500 dark:text-gray-400">progress ({percentage}%)</div>
                                 </div>
                             ) : (
                                 <div className="text-center">
                                     <div className="text-lg font-semibold text-gray-900 dark:text-white">
-                                        {formatTime(habit.record.value_achieved || 0)} / {formatTime(habit.target_value || 0)}
+                                        {formatTime(habit.record.current_value || 0)} / {formatTime(habit.target_value || 0)}
                                     </div>
-                                    <div className="text-xs text-gray-500 dark:text-gray-400">time spent</div>
+                                    <div className="text-xs text-gray-500 dark:text-gray-400">time spent ({percentage}%)</div>
                                 </div>
                             )}
 
